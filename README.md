@@ -1,48 +1,51 @@
-# 🧠 Jarvis Framework
-### The Modular AI Engineering Operating System
+# 🛠️ Jarvis Environment
+### Professional AI Engineering Workspace
 
-Jarvis Framework is not a configuration export; it is a **professional-grade AI infrastructure platform** designed to transform a standard Claude/OpenCode environment into a high-performance engineering workstation.
+This repository provides a portable, high-fidelity export of a professional Claude/OpenCode environment. It is designed to give developers instant access to advanced reasoning, structured memory, and a massive library of specialized engineering skills.
 
-By integrating advanced reasoning protocols, a structured long-term memory engine, and visual design intelligence, Jarvis enables developers to maintain deep architectural context and execute complex technical tasks with unprecedented precision.
+## 🚀 Installation
 
-## 🚀 Quick Start
-
-### Installation
+### Windows
 1. Clone this repository.
-2. Run the installation script:
-   - **Windows**: `powershell -ExecutionPolicy Bypass -File ./scripts/install/install.ps1`
-   - **Linux/macOS**: `bash ./scripts/install/install.sh` ( Coming soon )
-3. Restart your Claude Code session.
+2. Open PowerShell as Administrator.
+3. Run:
+   ```powershell
+   Set-ExecutionPolicy Bypass -Scope Process -Force
+   .\install.ps1
+   ```
+4. Restart Claude Code.
 
-## 🏗️ The Intelligence Stack
+## 📦 What's Inside?
 
-Jarvis operates as a layered OS for your AI agent:
+### 1. Specialized Skill Library (`/skills`)
+A curated collection of 1,400+ skills categorized by domain:
+- **AI Engineering**: Prompting, RAG, Agent architecture.
+- **Software Dev**: Full-stack patterns, language-specific best practices.
+- **Infrastructure**: Cloud-native, DevOps, Security audits.
+- **Design**: Visual blueprints and UI/UX patterns.
 
-| Layer | Component | Purpose |
-| :--- | :--- | :--- |
-| **Reasoning** | `Model Router` | Dynamic intent classification and model selection (Haiku $\rightarrow$ Sonnet $\rightarrow$ Opus). |
-| **Memory** | `Cerebro` | A schema-driven, interconnected wiki for long-term architectural recall. |
-| **Execution** | `Skill Library` | A modular repository of 1,400+ specialized engineering capabilities. |
-| **Visuals** | `Design Systems` | Technical blueprints for high-fidelity UI generation (Liquid Glass, Neumorphism, etc.). |
-| **Control** | `Lifecycle Hooks` | System-level event handlers for session management and automation. |
+### 2. Intelligence Routing (`/scripts`)
+Includes the `model_router.py`, which automatically classifies your prompts and recommends the best model (Haiku $\rightarrow$ Sonnet $\rightarrow$ Opus) to balance speed and depth.
 
-## 🛠️ Core Capabilities
+### 3. Cerebro Memory Engine (`/memory`)
+A structured, wiki-based long-term memory system. It prevents context loss across sessions by organizing knowledge into:
+- **Session Nodes**: Capture of specific work units.
+- **Concept Nodes**: Synthesized abstractions.
+- **ADRs**: Architecture Decision Records.
 
-- **Dynamic Model Routing**: Automatically switches models based on task complexity to optimize for speed and depth.
-- **Cerebro Memory Engine**: Prevents "context drift" by maintaining a structured knowledge graph of your project's evolution.
-- **Design-to-Code Pipeline**: Translates visual blueprints into production-ready SCSS/Tailwind code.
-- **Modular Skill Architecture**: Easily extend the agent's capabilities with standardized `SKILL.md` modules.
+### 4. Visual Design Systems (`/design-systems`)
+A knowledge base of visual blueprints (Liquid Glass, Neumorphism, etc.) that allows the agent to generate high-fidelity SCSS/CSS styles consistently.
 
-## 📖 Documentation
-Explore the full technical specifications in the `/docs` directory:
-- [Architecture Overview](./docs/architecture/overview.md)
-- [Installation Guide](./docs/setup/installation.md)
-- [Reasoning Engine](./docs/architecture/reasoning-engine.md)
-- [Memory Engine](./docs/architecture/memory-engine.md)
-- [Design Pipeline](./docs/workflows/design-pipeline.md)
+### 5. Operational Configs (`/config`)
+Portable templates for `settings.json` and `settings.local.json`, including a comprehensive allow-list of safe and powerful commands.
 
-## 🤝 Contributing
-Jarvis is an open-source ecosystem. We welcome contributions to the Skill Library, new Design Systems, and Routing improvements. See [Adding Skills](./docs/extension/adding-skills.md) for details.
+## 📖 Usage & Customization
 
----
-*Engineered for the next generation of AI-native software development.*
+- **Adding Skills**: Simply drop new `SKILL.md` files into the appropriate category in `/skills`.
+- **Managing Memory**: Use the `/memoria` commands (if implemented in your agent) to ingest and query the Cerebro wiki.
+- **Modifying Routing**: Edit `model_router.py` to adjust how your prompts are classified.
+
+## 🛡️ Portability & Safety
+- **No Personal Data**: All session histories and private tokens have been removed.
+- **Dynamic Paths**: The installer handles path resolution automatically using `{{HOME}}` templates.
+- **Safe Defaults**: The included `settings.local.json` provides a balanced set of permissions for power users.
