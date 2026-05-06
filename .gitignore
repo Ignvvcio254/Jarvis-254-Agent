@@ -1,0 +1,29 @@
+# Cerebro database (generated)
+cerebro/cerebro.db
+
+# Snapshots (personal state)
+snapshots/
+
+# Credentials
+.env
+*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Python
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# Personal session files
+cerebro/sessions/*.md
+!cerebro/sessions/.gitkeep
