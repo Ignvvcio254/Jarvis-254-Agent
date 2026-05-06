@@ -15,6 +15,16 @@ This repository provides a portable, high-fidelity export of a professional Clau
    ```
 4. Restart Claude Code.
 
+### Linux / macOS
+1. Clone this repository.
+2. Open your terminal.
+3. Make the installer executable and run it:
+   ```bash
+   chmod +x install.sh
+   ./install.sh
+   ```
+4. Restart Claude Code.
+
 ## 📦 What's Inside?
 
 ### 1. Specialized Skill Library (`/skills`)
@@ -39,13 +49,28 @@ A knowledge base of visual blueprints (Liquid Glass, Neumorphism, etc.) that all
 ### 5. Operational Configs (`/config`)
 Portable templates for `settings.json` and `settings.local.json`, including a comprehensive allow-list of safe and powerful commands.
 
-## 📖 Usage & Customization
+## 📖 How to Use This Environment
 
-- **Adding Skills**: Simply drop new `SKILL.md` files into the appropriate category in `/skills`.
-- **Managing Memory**: Use the `/memoria` commands (if implemented in your agent) to ingest and query the Cerebro wiki.
-- **Modifying Routing**: Edit `model_router.py` to adjust how your prompts are classified.
+### Leveraging the Skill Library
+Once installed, your agent has access to the specialized skills. You can invoke them by referencing the domain or specific skill name. The agent will use these to provide production-grade code, security audits, and architecture reviews without needing repetitive prompting.
+
+### Working with Cerebro Memory
+Cerebro transforms your `.claude` folder into a living knowledge base. 
+- **Recall**: The agent can refer back to previous `Session Nodes` to resume complex tasks without re-explaining the context.
+- **Synthesis**: As you work, the agent synthesizes patterns into `Concept Nodes`, creating a permanent architectural record of your project.
+
+### Dynamic Model Routing
+The `model_router.py` helps you optimize token spend and latency. It analyzes the complexity of your request:
+- **Simple tasks** $\rightarrow$ Haiku
+- **Complex implementation** $\rightarrow$ Sonnet
+- **Deep architectural reasoning** $\rightarrow$ Opus
 
 ## 🛡️ Portability & Safety
 - **No Personal Data**: All session histories and private tokens have been removed.
 - **Dynamic Paths**: The installer handles path resolution automatically using `{{HOME}}` templates.
 - **Safe Defaults**: The included `settings.local.json` provides a balanced set of permissions for power users.
+
+## 🛠️ Troubleshooting
+- **Windows Permissions**: If `install.ps1` fails, ensure you are running PowerShell as Administrator and have set the `ExecutionPolicy` to `Bypass`.
+- **Linux/macOS Permissions**: Ensure the `install.sh` script has execution permissions (`chmod +x`).
+- **MCP Tools**: This framework configures the *hooks* for MCPs. You must still install the corresponding MCP servers (e.g., `claude-mem`) on your machine for the tools to function.
