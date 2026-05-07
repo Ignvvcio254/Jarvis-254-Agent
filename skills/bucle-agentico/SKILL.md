@@ -1,164 +1,174 @@
 ---
 name: bucle-agentico
-description: "Execute complex features phase by phase with just-in-time context mapping. Activate with: /bucle-agentico <PRP-ID> — or when a PRP is approved and ready to implement. Key innovation: subtasks are NOT pre-generated — they are mapped just-in-time from real codebase context."
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
+description: "Ejecutar features complejas por fases con mapeo de contexto real ANTES de cada fase. La innovacion clave: NO generar todas las subtareas al inicio — mapear contexto just-in-time y generar subtareas basadas en la realidad actual del sistema. Activar cuando la tarea toca multiples archivos coordinados, requiere cambios en DB + codigo + UI, tiene fases que dependen una de otra, o cuando un PRP fue aprobado y hay que implementarlo."
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
-# Bucle Agéntico — Phase-by-Phase Agentic Execution
+# Modo BLUEPRINT del Bucle Agentico
 
-> Just-in-time context mapping. Auto-blindaje on errors.
-> Never generate all subtasks at the start — map context before each phase.
+> "No planifiques lo que no entiendes. Mapea contexto, luego planifica."
 
----
-
-## Core Innovation
-
-Traditional planning generates ALL subtasks upfront from imagination.
-Bucle Agéntico generates subtasks AFTER reading what actually exists in the codebase.
-
-```
-WRONG:  Plan everything → Execute (subtasks are fictional)
-RIGHT:  Enter phase → Read real code → Generate subtasks → Execute
-```
-
-This eliminates "hallucinated file paths" and "assumed patterns that don't exist."
+El modo BLUEPRINT es para sistemas complejos que requieren construccion por fases con mapeo de contexto just-in-time.
 
 ---
 
-## Activation
+## Cuando Usar
 
-```
-/bucle-agentico PRP-XXX
-```
-
-1. Read `.claude/PRPs/PRP-XXX-<name>.md`
-2. Verify status is `APROBADO` (refuse if still `PENDING`)
-3. Update status to `IN_PROGRESS`
-4. Begin Phase 1
+- La tarea requiere multiples componentes coordinados
+- Involucra cambios en DB + codigo + UI
+- Tiene fases que dependen una de otra
+- Requiere entender contexto antes de implementar
+- Un PRP fue aprobado y hay que ejecutarlo
 
 ---
 
-## Execution Flow
+## La Innovacion: Mapeo de Contexto Just-In-Time
 
-### For Each Phase N:
+### Enfoque Tradicional (MALO)
+
+Recibir problema → Generar TODAS las tareas y subtareas → Ejecutar linealmente.
+Problema: Las subtareas se generan basandose en SUPOSICIONES, no en contexto real.
+
+### Enfoque BLUEPRINT (CORRECTO)
 
 ```
-STEP 1 — ENTER PHASE
-  Announce: "=== Phase N: <name> ==="
-  Update PRP: mark phase as IN_PROGRESS
-
-STEP 2 — MAP CONTEXT (just-in-time)
-  - Glob: find files relevant to this phase
-  - Grep: find existing patterns, imports, conventions
-  - Read: key files that will be touched or extended
-  - Answer: "What exists? What patterns do I follow? What did Phase N-1 create?"
-  - Build a mental model of the REAL state, not assumed state
-
-STEP 3 — GENERATE SUBTASKS
-  Only now, based on real context:
-  - List concrete subtasks (file edits, new files, commands)
-  - Each subtask references REAL file paths found in Step 2
-  - No imaginary abstractions — only what the codebase actually uses
-
-STEP 4 — EXECUTE SUBTASKS
-  Use TodoWrite to track subtask progress:
-  - [ ] Subtask 1
-  - [ ] Subtask 2
-  - [ ] Subtask 3
-  Execute one by one, marking complete as done.
-
-STEP 5 — AUTO-BLINDAJE (on any error)
-  IF error occurs:
-    a. Fix the error
-    b. Run the test/build/lint to confirm fix
-    c. Document in PRP Learnings section:
-       "### Error N — <short description>
-        What happened: [error message]
-        Root cause: [why it happened]
-        Fix applied: [what was changed]
-        Never repeat: [rule to prevent recurrence]"
-    d. Continue execution — do NOT stop for non-blocking errors
-
-STEP 6 — PHASE VALIDATION
-  Run the validation defined for this phase:
-  - Build passes? (npm run build / cargo build / etc.)
-  - Tests pass? (npm test / pytest / etc.)
-  - Manual check: does the phase output exist and work?
-
-STEP 7 — TRANSITION
-  Mark phase DONE in PRP
-  Announce: "Phase N complete. Output: <artifact>"
-  Move to Phase N+1 (repeat from STEP 1)
+Recibir problema → Generar solo FASES (sin subtareas)
+    |
+ENTRAR en Fase 1 → MAPEAR contexto real
+    |
+GENERAR subtareas basadas en contexto REAL → Ejecutar Fase 1
+    |
+ENTRAR en Fase 2 → MAPEAR contexto (incluyendo lo construido en Fase 1)
+    |
+GENERAR subtareas de Fase 2 → Ejecutar → ... repetir ...
 ```
+
+Ventaja: Cada fase se planifica con informacion REAL del estado actual del sistema.
 
 ---
 
-## Progress Tracking with TodoWrite
+## El Flujo BLUEPRINT: 5 Pasos
 
-At the start of each phase, create a todo list:
+### PASO 1: DELIMITAR EN FASES
+
+- Entender el problema FINAL completo
+- Romper en FASES ordenadas cronologicamente
+- Identificar dependencias entre fases
+- NO generar subtareas todavia
+- Usar TodoWrite para registrar las fases
+
+### PASO 2: ENTRAR EN FASE N — MAPEAR CONTEXTO
+
+ANTES de generar subtareas, explorar:
+
+**Codebase:**
+- Que archivos/componentes existen relacionados?
+- Que patrones usa el proyecto actualmente?
+- Hay codigo que se puede reutilizar?
+
+**Estado actual del sistema:**
+- Que construi en fases anteriores?
+- Que puedo asumir que ya existe?
+- Que restricciones tengo?
+
+DESPUES de mapear, generar subtareas especificas y actualizar TodoWrite.
+
+### PASO 3: EJECUTAR SUBTAREAS DE LA FASE
 
 ```
-Phase 2: API Endpoint
-[ ] Read existing route patterns in src/routes/
-[ ] Create src/routes/feature.ts following existing pattern
-[ ] Add route to src/routes/index.ts
-[ ] Write unit test in src/routes/feature.test.ts
-[ ] Run npm test -- --grep feature
+WHILE subtareas pendientes en fase actual:
+  1. Marcar subtarea como in_progress en TodoWrite
+  2. Ejecutar la subtarea
+  3. Usar herramientas segun el juicio (playwright, build, grep, etc.)
+  4. Validar resultado
+     - Si hay error → AUTO-BLINDAJE (paso 3.5)
+     - Si esta bien → Marcar completed
+  5. Siguiente subtarea
+Fase completada cuando todas las subtareas done.
 ```
 
-Each item checked off as it completes. Never mark a phase done with unchecked items.
+### PASO 3.5: AUTO-BLINDAJE (cuando hay errores)
+
+Cuando algo falla:
+1. ARREGLA el codigo
+2. TESTEA que funcione
+3. DOCUMENTA el aprendizaje:
+
+```markdown
+### [YYYY-MM-DD]: [Titulo corto]
+- **Error**: [Que fallo exactamente]
+- **Fix**: [Como se arreglo]
+- **Aplicar en**: [Donde mas aplica este conocimiento]
+```
+
+| Tipo de Error | Donde Documentar |
+|---------------|-----------------|
+| Especifico de esta feature | PRP actual (seccion Aprendizajes) |
+| Aplica a multiples features | Skill relevante en ~/.claude/skills/ |
+| Aplica a TODO el proyecto | CLAUDE.md del proyecto |
+
+El conocimiento persiste. El mismo error NUNCA ocurre dos veces.
+
+### PASO 4: TRANSICIONAR A SIGUIENTE FASE
+
+- Confirmar que la fase actual esta REALMENTE completa
+- NO asumir que todo salio como se planeo
+- Volver a PASO 2 con la siguiente fase
+- El contexto ahora INCLUYE lo construido
+
+### PASO 5: VALIDACION FINAL
+
+- Testing end-to-end del sistema completo
+- Validacion visual si aplica (playwright)
+- Confirmar que el problema ORIGINAL esta resuelto
+- Reportar al senor Ignacio que se construyo
 
 ---
 
-## Auto-Blindaje Protocol
+## Errores Comunes
 
-Auto-blindaje means: errors are learning opportunities, not blockers.
-
+**Error 1: Generar todas las subtareas al inicio**
 ```
-Error detected
-    ↓
-Diagnose root cause (read error, check context)
-    ↓
-Apply fix
-    ↓
-Verify fix works (run the failing command again)
-    ↓
-Document in PRP Learnings/Gotchas
-    ↓
-Continue execution
+MAL:  Fase 1: DB Schema → 10 subtareas detalladas
+      Fase 2: APIs → 8 subtareas (basadas en SUPOSICIONES)
+
+BIEN: Fase 1: DB Schema (sin subtareas)
+      Fase 2: APIs (sin subtareas)
+      → Entrar en Fase 1 → MAPEAR contexto → GENERAR subtareas → Ejecutar
+      → Entrar en Fase 2 → MAPEAR contexto real → GENERAR subtareas
 ```
 
-The same error must NEVER occur twice in the same project.
-If an error recurs, the Learnings section was not read at phase start.
-
-**Rule:** At the start of each phase, READ the Learnings/Gotchas section of the PRP.
-
----
-
-## Final Validation (after last phase)
-
+**Error 2: No re-mapear contexto entre fases**
 ```
-1. Run full test suite
-2. Run build
-3. Run lint/typecheck
-4. Verify ALL success criteria from PRP are met (binary check each one)
-5. Update PRP status: IN_PROGRESS → DONE
-6. Report to user:
-
-   "=== Bucle Agéntico Complete ==="
-   PRP-XXX: <title>
-   Phases completed: N/N
-   Criteria met: N/N
-   Errors encountered: M (all fixed, documented in Learnings)
-   Final state: [what was built]
+MAL:  Fase 1 completada → Pasar directo a ejecutar Fase 2
+BIEN: Fase 1 completada → MAPEAR contexto de Fase 2 → Generar subtareas → Ejecutar
 ```
 
 ---
 
-## Safety Limits
+## Checklist por Fase
 
-- Never mark a phase DONE without running its validation
-- Never skip the context-mapping step (Step 2) — it prevents hallucinated paths
-- Never generate subtasks before reading the actual codebase
-- If a phase fails 3 times: STOP and report to user with full error context
-- Irreversible operations (db drops, force push): always confirm with user first
+Antes de marcar una fase como completada:
+- [ ] Todas las subtareas estan realmente terminadas?
+- [ ] La funcionalidad hace lo que se esperaba?
+- [ ] Hay errores documentados en auto-blindaje?
+
+Antes de transicionar a siguiente fase:
+- [ ] Mapee el contexto actualizado?
+- [ ] Las subtareas de la nueva fase consideran lo que YA existe?
+
+---
+
+## Principios BLUEPRINT
+
+1. Fases primero, subtareas despues — Solo generar subtareas cuando entras a la fase
+2. Mapeo obligatorio — Siempre mapear contexto real antes de generar subtareas
+3. TodoWrite activo — Mantener actualizado el progreso para visibilidad
+4. Validacion por fase — Confirmar que cada fase esta completa antes de avanzar
+5. Contexto acumulativo — Cada fase hereda el contexto de las anteriores
+6. Auto-blindaje — Cada error se documenta para no repetirse
+
+---
+
+*"La precision viene de mapear la realidad, no de imaginar el futuro."*
+*"El sistema que se blinda solo es invencible."*

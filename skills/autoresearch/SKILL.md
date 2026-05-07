@@ -1,180 +1,235 @@
 ---
 name: autoresearch
-description: "Self-optimization of skills using Karpathy binary eval loop + Hermes Agent Curator pattern. Activate with: /autoresearch <skill-name> (Mode A: Karpathy loop), /autoresearch curator (Mode B: skill inventory management). Also triggers when the user says 'optimize this skill', 'improve X skill', 'clean up skills', 'audit skills'."
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
+description: "Auto-optimizacion autonoma de skills usando el patron de Karpathy + Curator de Hermes Agent. DOS MODOS: (A) optimizar un skill especifico con evals binarias, (B) curar el ecosistema completo de skills (fusion, archivado, transiciones de estado). Activar con: optimiza este skill, mejora el skill, autoresearch, self-improve, corre evals, evalua el skill, benchmark skill — O — curar skills, revisar skills obsoletos, fusionar skills, limpiar skills. NO USAR para: crear skills nuevos (usar skill-creator), correr skills normalmente."
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Agent
 ---
 
-# Autoresearch — Self-Optimizing Skill System
+# Autoresearch: Self-Improving Skills + Curator
 
-> Two-mode skill optimization: Karpathy binary eval loop (iterative improvement) + Hermes Agent Curator (inventory management).
+> Dos fuentes: patron Karpathy (optimizacion individual) + Curator de Hermes Agent/NousResearch (curación ecosistema).
+> El principio: un loop autonomo que mejora skills indefinidamente, y un curador que mantiene el ecosistema sano.
 
 ---
 
-## Mode A — Karpathy Loop (Single Skill Optimization)
+## MODO B — Curator (ecosistema completo)
 
-Trigger: `/autoresearch <skill-name>`
+> Trigger: "curar skills", "revisar skills obsoletos", "fusionar skills", "limpiar skills"
+> Corre autónomamente sin aprobación por skill individual.
 
-### Philosophy
+### Filosofía
 
-Binary evaluations (yes/no), one change per iteration, git commit before mutating, strict budget cap.
-Based on Andrej Karpathy's principle: small, measurable, reversible improvements beat big rewrites.
+Inspirado en `curator.py` de Hermes Agent (NousResearch, 134k⭐):
+- Skills acumulan entropía: duplicados, micro-skills que deberían ser subsecciones, skills obsoletos
+- El curador fusiona, archiva y mantiene — **nunca borra**
+- Skills con `pinned: true` en frontmatter son **inmunes** a toda transición
 
-### Parameters
+### Estados de un skill
 
-| Parameter | Default | Description |
+```
+activo ──(60d sin uso)──► stale ──(120d sin uso)──► archivado
+  ▲                                                      │
+  └──────────── restaurar manualmente si necesario ──────┘
+
+pinned: true → inmune a todas las transiciones automáticas
+```
+
+### Protocolo Curator (5 pasos)
+
+```
+PASO 1: INVENTARIO
+  Glob ~/.claude/skills/**/SKILL.md
+  Extraer: name, description, última modificación
+  Agrupar por prefijo/dominio (azure-*, seo-*, react-*, etc.)
+
+PASO 2: TRANSICIONES AUTOMÁTICAS (sin LLM, basadas en git log)
+  activo → stale:    sin commit/uso en >60 días
+  stale → archivado: sin uso en >120 días AND NOT pinned
+
+PASO 3: ANÁLISIS LLM (clusters de skills)
+  Por cada cluster de prefijo compartido, preguntar:
+    ¿Hacen lo mismo con distintos nombres? → candidatos a fusión
+    ¿Un micro-skill debería ser subsección de un skill mayor? → umbrella
+    ¿Hay redundancia con skills bundled del sistema? → candidato a archivar
+
+PASO 4: CONSOLIDACIÓN
+  Fusionar A + B → C (umbrella skill con lo mejor de ambos)
+  Archivar A y B en ~/.claude/skills/_archived/YYYY-MM-DD-nombre/
+  Añadir nota en A y B: "archived: absorbed into C — YYYY-MM-DD"
+  NUNCA usar contadores de uso como único criterio de fusión
+
+PASO 5: REPORTE al señor Ignacio
+  Skills revisados: N | Fusiones: X | Archivados: Y | Pinned (intocados): Z
+  Candidatos para revisión manual: [lista con razón]
+  Append a cerebro/log.md: "[YYYY-MM-DD] curator run: X fusiones, Y archivados"
+```
+
+### Invariantes de seguridad (del Hermes curator)
+- Solo actúa sobre `~/.claude/skills/` — NUNCA skills del sistema o plugins externos
+- Archiva en `~/.claude/skills/_archived/YYYY-MM-DD-nombre/` (siempre recuperable)
+- Ante cualquier duda → proponer al señor Ignacio, no ejecutar
+- Registrar cada acción en `cerebro/log.md`
+
+---
+
+## MODO A — Karpathy Loop (skill individual)
+
+## Filosofia
+
+"Un skill ordinario optimizado durante un tiempo extraordinario produce resultados extraordinarios."
+El interes compuesto aplicado a prompts. Cada iteracion es un micro-experimento.
+Lo que importa no es la mejora individual (0.5%) sino la acumulacion (50 iteraciones = transformacion).
+
+---
+
+## Fase 1: Setup (con el usuario)
+
+Antes de correr autonomamente, alinear con el usuario:
+
+### 1.1 Identificar el skill target
+
+Leer el SKILL.md completo del skill target. Entender que hace, que outputs produce, que herramientas usa.
+
+### 1.2 Definir las Evals
+
+Las evals son la UNICA forma de medir si el skill mejoro. Sin buenas evals, autoresearch es ruido.
+
+**Reglas de evals:**
+1. **SIEMPRE binarias** (si/no, pass/fail). NUNCA escalas Likert.
+2. **3-6 criterios** por skill.
+3. **Nunca demasiado estrechos.** No optimizar para un solo atributo superficial.
+4. **Cubrir dimensiones ortogonales.** Cada criterio mide algo DIFERENTE.
+
+### 1.3 Definir parametros
+
+| Parametro | Default | Descripcion |
 |-----------|---------|-------------|
-| `max_iterations` | 30 | Hard cap on optimization rounds |
-| `budget` | $5 | Token/cost budget — stop if exceeded |
-| `eval_criteria` | 3–6 | Binary yes/no questions per output |
-| `target_score` | 0.85 | Stop when 85%+ criteria pass |
+| `N` | 5 | Outputs generados por ciclo |
+| `max_score` | N * num_criterios | Score maximo posible |
+| `interval` | 3 min | Tiempo entre ciclos |
+| `target_score` | 90% del max | Score para considerar "excelente" |
+| `max_iterations` | 30 | Limite de iteraciones |
+| `budget` | $5 USD | Limite de gasto estimado |
 
-### Loop Protocol
+### 1.4 Crear branch y baseline
 
-```
-FOR iteration = 1 to max_iterations:
-
-  1. ANALYZE
-     - Read current skill file
-     - Run N sample prompts through it
-     - Note failure modes: vague triggers, missing steps, wrong tool calls
-
-  2. HYPOTHESIZE
-     - Form ONE hypothesis: "If I change X, criterion Y will improve"
-     - Never change multiple things at once (confounds the signal)
-
-  3. MUTATE
-     - Edit ONLY the skill body — never change YAML frontmatter
-     - Keep the change minimal and targeted
-     - git add + git commit -m "autoresearch: iter-N — <hypothesis>"
-     - Record commit hash
-
-  4. GENERATE
-     - Run 3–5 test prompts through the mutated skill
-     - Capture outputs
-
-  5. EVALUATE (binary)
-     For each criterion:
-       - "Does the output correctly identify the trigger?" YES/NO
-       - "Are all required steps present?" YES/NO
-       - "Is tool usage correct and minimal?" YES/NO
-       - "Is the output concise (no padding)?" YES/NO
-       - [additional criteria specific to skill domain]
-     Calculate score = (YES count) / (total criteria)
-
-  6. DECIDE
-     IF score > previous_score:
-       KEEP mutation, continue
-     ELSE:
-       git reset --hard HEAD~1
-       Revert to previous version
-
-  7. RECORD
-     Append to TSV log:
-     iteration \t score \t hypothesis \t commit_hash \t kept(yes/no)
-
-  IF score >= target_score: STOP (success)
-  IF budget_exceeded: STOP (budget)
-  IF 3 consecutive iterations with no improvement: STOP (plateau)
+```bash
+git checkout -b autoresearch/<skill-name>
 ```
 
-### TSV Log Format
+- Copiar el SKILL.md a `<skill>/SKILL.md.backup`
+- Inicializar `<skill>/autoresearch-results.tsv`:
+  ```
+  iteration	score	max_score	pct	status	changes_summary
+  ```
+- Correr la primera evaluacion como **baseline** (iteration 0, status: baseline)
+- Confirmar con el usuario: "Baseline: X/Y (Z%). Arranco?"
 
-Location: `~/.claude/skills/_autoresearch/<skill-name>/log.tsv`
-
-```tsv
-iteration	score	hypothesis	commit_hash	kept	timestamp
-1	0.60	"Add explicit trigger phrases"	abc1234	yes	2025-01-01T10:00:00Z
-2	0.75	"Split step 3 into substeps"	def5678	yes	2025-01-01T10:05:00Z
-3	0.70	"Add tool hierarchy"	ghi9012	no	2025-01-01T10:10:00Z
-```
-
-### Termination Report
-
-```
-## Autoresearch Complete — <skill-name>
-Iterations: N/30
-Final score: X.XX (target: 0.85)
-Commits kept: N | Reverted: M
-Budget used: ~$X.XX
-Status: SUCCESS / PLATEAU / BUDGET_EXCEEDED
-
-Key improvements made:
-- [improvement 1]
-- [improvement 2]
-```
+**Una vez el usuario confirma, NO PARAR.**
 
 ---
 
-## Mode B — Curator (Skill Inventory Management)
+## Fase 2: El Loop (autonomo)
 
-Trigger: `/autoresearch curator`
+> "El humano puede estar dormido. NUNCA pausar para preguntar."
 
-### Philosophy
-
-Skills go stale without maintenance. The curator automatically transitions skill status and proposes merges/archives — but NEVER deletes. Based on Hermes Agent's curator pattern.
-
-### Inventory Protocol
+### El ciclo exacto:
 
 ```
-1. INVENTORY
-   Glob: ~/.claude/skills/*/SKILL.md
-   For each skill:
-   - Extract frontmatter: name, description, last_modified
-   - Check git log for last commit touching the file
-   - Calculate age in days since last modification
+LOOP (hasta max_iterations o target_score):
 
-2. AUTO-TRANSITION
-   IF age > 60 days AND status = active:
-     → Transition to: stale
-     → Add note to frontmatter: "stale_since: YYYY-MM-DD"
+  1. ANALIZAR — Leer resultados previos. Que fallo? Que patron emerge?
 
-   IF age > 120 days AND status = stale:
-     → Propose archive to user (never auto-archive)
-     → If user approves: move to ~/.claude/skills/_archived/YYYY-MM-DD-<name>/
+  2. HIPOTESIS — Formular UNA hipotesis clara:
+     "Si cambio X en el prompt, deberia mejorar Y porque Z"
 
-3. CLUSTER ANALYSIS (LLM)
-   Group skills by semantic similarity:
-   - Read descriptions of all active skills
-   - Identify clusters with overlapping functionality
-   - Flag potential merges: "skill-A and skill-B both do X"
+  3. MUTAR — Editar el SKILL.md del skill target
+     - UN cambio por iteracion
+     - NUNCA tocar el frontmatter
+     - NUNCA copiar los criterios de eval al prompt (gaming)
 
-4. MERGE PROPOSAL
-   For each merge candidate:
-   - Show overlap analysis
-   - Propose: "Merge skill-A into skill-B? skill-A would be archived."
-   - Wait for user approval before executing
+  4. COMMIT — git add + git commit ANTES de correr
+     Mensaje: "autoresearch(<skill>): iter N — <hipotesis corta>"
 
-5. REPORT
-   Present to user:
-   - Total skills: N active | M stale | K archived
-   - Transition candidates: [list]
-   - Merge candidates: [list]
-   - Recommended actions: [prioritized list]
+  5. GENERAR — Correr el skill N veces con inputs variados
+
+  6. EVALUAR — Para cada output, aplicar cada criterio (si/no)
+     Score = total "si" / max_score
+
+  7. DECIDIR:
+     - Score > best_score -> STATUS: keep (commit se queda)
+     - Score <= best_score -> STATUS: discard (git reset --hard HEAD~1)
+     - Crash -> STATUS: crash (fix trivial o revertir)
+
+  8. REGISTRAR — Append a autoresearch-results.tsv
+
+  9. REPETIR
 ```
 
-### Archive Structure
+### Reglas del loop
 
-```
-~/.claude/skills/_archived/
-└── YYYY-MM-DD-<skill-name>/
-    ├── SKILL.md          ← original skill, preserved exactly
-    ├── ARCHIVE_NOTE.md   ← why it was archived, what replaced it
-    └── original_path.txt ← where it came from
-```
+- **UN cambio por iteracion.** Aislamiento de variables.
+- **Inputs variados.** Al menos 3 inputs diferentes por ciclo.
+- **Simplicidad > complejidad.** Eliminar lineas que no aportan = mejor que agregar.
+- **Crash tolerance.** Log it, revert, try different approach.
 
-### Rules
+### Criterio de simplicidad (Karpathy)
 
-- NEVER delete skills — only archive
-- NEVER auto-archive — always get user approval
-- Merges preserve the better skill, archive the weaker one
-- Archived skills can be restored with: `cp ~/.claude/skills/_archived/<name>/SKILL.md ~/.claude/skills/<name>/SKILL.md`
+> Mejora pequena por ELIMINAR complejidad = SIEMPRE vale la pena.
+> Agregar 10 instrucciones para subir 5% = cuestionable.
 
 ---
 
-## Safety Limits
+## Fase 3: Reporte
 
-- Mode A: max 30 iterations, $5 budget hard cap
-- Mode A: only mutates skill body — YAML frontmatter is immutable
-- Mode A: every mutation is committed before evaluation (easy rollback)
-- Mode B: curator is read-only until user approves actions
-- Both modes: log all operations to `~/.claude/cerebro/log.md`
+Cuando se alcanza `target_score` o `max_iterations`:
+
+```
+## Autoresearch Report: <skill-name>
+
+**Baseline:** X/Y (Z%)
+**Final:** X/Y (Z%)
+**Mejora:** +N% en M iteraciones
+**Costo estimado:** ~$X USD
+
+### Cambios que mejoraron:
+1. Iter N: <cambio> -> +X%
+
+### Cambios que NO mejoraron:
+1. Iter N: <cambio> -> descartado
+```
+
+Mostrar al usuario. Si aprueba: `git checkout main && git merge autoresearch/<skill>`.
+
+---
+
+## Tipos de Evaluacion
+
+### Codigo
+- El codigo compila/funciona sin errores? (si/no)
+- Sigue los patrones del proyecto? (si/no)
+- No introduce vulnerabilidades? (si/no)
+- Es mantenible y legible? (si/no)
+
+### Texto
+- Contiene la informacion clave solicitada? (si/no)
+- El tono es apropiado? (si/no)
+- La estructura es clara? (si/no)
+- No hay informacion inventada? (si/no)
+
+### Visual
+- Todo el texto es legible? (si/no)
+- El layout es claro? (si/no)
+- Comunica la idea sin ambiguedad? (si/no)
+
+---
+
+## Limites de Seguridad
+
+| Limite | Valor |
+|--------|-------|
+| Max iteraciones | 30 |
+| Budget | $5 USD |
+| Max prompt growth | 2x original |
+| Backup | Siempre obligatorio |
+| Branch dedicado | Siempre |
+| Solo body del SKILL.md | Frontmatter es sacrosanto |

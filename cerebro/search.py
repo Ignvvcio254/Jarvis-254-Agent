@@ -104,7 +104,7 @@ def cmd_index(verbose: bool = False) -> None:
 
     conn.commit()
     conn.close()
-    print(f"cerebro/search: indexed {indexed} nodes ({skipped} skipped) → {DB_PATH.name}")
+    print(f"cerebro/search: indexed {indexed} nodes ({skipped} skipped) -> {DB_PATH.name}")
 
 
 def cmd_query(term: str, area: str = "", limit: int = 10) -> None:
@@ -146,13 +146,13 @@ def cmd_query(term: str, area: str = "", limit: int = 10) -> None:
         print(f"No results for: {term}")
         return
 
-    print(f"\n🔍 Results for \"{term}\"{f' [{area}]' if area else ''} — {len(rows)} found\n")
+    print(f"\nResults for \"{term}\"{f' [{area}]' if area else ''} - {len(rows)} found\n")
     for r in rows:
         date_str = f" ({r['date']})" if r['date'] else ""
         area_str = f" [{r['area']}]" if r['area'] else ""
-        print(f"  📄 {r['title']}{area_str}{date_str}")
+        print(f"  FILE {r['title']}{area_str}{date_str}")
         print(f"     {r['excerpt']}")
-        print(f"     → {r['node_id']}\n")
+        print(f"     -> {r['node_id']}\n")
 
 
 def cmd_stats() -> None:
@@ -172,7 +172,7 @@ def cmd_stats() -> None:
 
     conn.close()
 
-    print(f"\n📊 cerebro index stats")
+    print("\ncerebro index stats")
     print(f"   Nodes indexed : {total}")
     print(f"   DB path       : {DB_PATH}")
     print(f"   Last indexed  : {last or 'never'}\n")

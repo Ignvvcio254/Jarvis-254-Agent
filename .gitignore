@@ -1,11 +1,14 @@
 # Cerebro database (generated)
 cerebro/cerebro.db
+cerebro/runtime_sessions.jsonl
+cerebro/runtime_metrics.jsonl
 
 # Snapshots (personal state)
 snapshots/
 
 # Credentials
 .env
+*.env
 *.local
 
 # OS
@@ -27,3 +30,9 @@ node_modules/
 # Personal session files
 cerebro/sessions/*.md
 !cerebro/sessions/.gitkeep
+
+# Quarantine (private, excluded)
+quarantine/
+
+# Optional upstream references (not required in clone)
+upstream/

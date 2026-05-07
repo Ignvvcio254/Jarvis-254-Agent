@@ -1,49 +1,49 @@
 ---
 name: snapshot
-description: "Create and restore checkpoints of Jarvis configuration and active project state. Activate with: /snapshot create, /snapshot list, /snapshot restore <id>, /snap create — or before any destructive operation. Inspired by the Hermes Agent snapshot/rollback system."
+description: "Crea y restaura checkpoints del estado de configuración de Jarvis y del proyecto activo. Activar con: /snapshot create, /snapshot list, /snapshot restore <id>, /snap create — o antes de cualquier operación destructiva. Inspirado en el sistema snapshot/rollback de Hermes Agent."
 allowed-tools: Bash, Read, Write, Glob, Grep
 ---
 
-# Snapshot — State Checkpoints
+# Snapshot — Checkpoints de Estado
 
-> Inspired by the `/snapshot` + `/rollback` system of Hermes Agent (NousResearch).
-> Safety net before risky operations. Never deletes snapshots automatically.
-
----
-
-## When to Create a Snapshot
-
-Create automatically (without the user asking) before:
-- Modifying `~/.claude/CLAUDE.md` or `~/.claude/settings.json`
-- Running curator or skill merges
-- Database migrations or schema changes
-- Force-push or rebase on shared branches
-- Any operation marked as destructive
+> Inspirado en el sistema `/snapshot` + `/rollback` de Hermes Agent (NousResearch).
+> Safety net antes de operaciones riesgosas. Nunca borra snapshots automáticamente.
 
 ---
 
-## Commands
+## ¿Cuándo crear un snapshot?
 
-### `/snapshot create [name]` or `/snap`
+Crear automáticamente (sin que el usuario lo pida) antes de:
+- Modificar `~/.claude/CLAUDE.md` o `~/.claude/settings.json`
+- Ejecutar curator o fusiones de skills
+- Migraciones de base de datos o cambios de schema
+- Force-push o rebase en branches compartidos
+- Cualquier operación marcada como destructiva
+
+---
+
+## Comandos
+
+### `/snapshot create [nombre]` o `/snap`
 
 ```
-1. Generate ID: YYYY-MM-DD-HH-MM-SS (UTC timestamp)
-2. Create directory: ~/.claude/snapshots/<id>/
-3. Capture configuration files:
+1. Generar ID: YYYY-MM-DD-HH-MM-SS (timestamp UTC)
+2. Crear directorio: ~/.claude/snapshots/<id>/
+3. Capturar archivos de configuración:
    - ~/.claude/CLAUDE.md
    - ~/.claude/settings.json
-   - ~/.claude/goals.md (if it exists)
+   - ~/.claude/goals.md (si existe)
    - ~/.claude/cerebro/index.md
    - ~/.claude/cerebro/log.md
-4. Capture git state of the active project:
+4. Capturar estado git del proyecto activo:
    - git log --oneline -10 > git-log.txt
    - git diff HEAD > git-diff.txt
    - git status > git-status.txt
-5. Create metadata.json
-6. Confirm: "Snapshot created: <id>"
+5. Crear metadata.json
+6. Confirmar: "📸 Snapshot creado: <id>"
 ```
 
-**Snapshot structure:**
+**Estructura del snapshot:**
 ```
 ~/.claude/snapshots/YYYY-MM-DD-HH-MM-SS/
 ├── metadata.json
@@ -61,43 +61,43 @@ Create automatically (without the user asking) before:
 
 ```
 1. Glob ~/.claude/snapshots/*/metadata.json
-2. Show table: ID | Date | Project | Reason
-3. Sort by most recent first
+2. Mostrar tabla: ID | Fecha | Proyecto | Razón
+3. Ordenar por más reciente primero
 ```
 
 ### `/snapshot restore <id>`
 
 ```
-CONFIRM with the user before executing
+⚠️ Confirmar con el usuario antes de ejecutar
 
-1. Verify the snapshot exists
-2. Show what will be restored
-3. Wait for explicit confirmation
-4. On confirm:
-   a. Create snapshot of CURRENT state first (pre-restore backup)
-   b. Copy config files to destination
-   c. Report: "Restored from <id>"
+1. Verificar que el snapshot existe
+2. Mostrar qué se va a restaurar
+3. Esperar confirmación explícita
+4. Al confirmar:
+   a. Crear snapshot del estado ACTUAL primero (pre-restore backup)
+   b. Copiar archivos de config al destino
+   c. Informar: "✅ Restaurado desde <id>"
 ```
 
 ### `/snapshot prune [--keep N]`
 
 ```
-1. Default: keep the last 30 snapshots
-2. Delete the oldest ones that exceed the limit
-3. NEVER delete snapshots with "pinned": true in metadata.json
+1. Por defecto mantener los últimos 30 snapshots
+2. Eliminar los más antiguos que excedan el límite
+3. NUNCA eliminar snapshots con "pinned": true en metadata.json
 ```
 
 ---
 
-## metadata.json — Structure
+## metadata.json — Estructura
 
 ```json
 {
   "id": "YYYY-MM-DD-HH-MM-SS",
   "timestamp": "YYYY-MM-DDTHH:MM:SSZ",
-  "project": "project-name",
-  "project_path": "/absolute/path/to/project",
-  "reason": "description of why it was created",
+  "project": "nombre-del-proyecto",
+  "project_path": "/ruta/absoluta/proyecto",
+  "reason": "descripcion de por que se creo",
   "pinned": false,
   "files_captured": ["CLAUDE.md", "settings.json", "goals.md"]
 }
@@ -105,21 +105,21 @@ CONFIRM with the user before executing
 
 ---
 
-## `/rollback [N]` — Git Rollback
+## `/rollback [N]` — Git rollback
 
 ```
-/rollback         → show last 10 commits with restore option
-/rollback 3       → show what would be lost by git reset --soft HEAD~3
-/rollback apply N → execute git reset --soft HEAD~N (confirm before)
+/rollback         → muestra últimos 10 commits con opción de restaurar
+/rollback 3       → muestra qué se pierde al hacer git reset --soft HEAD~3
+/rollback apply N → ejecuta git reset --soft HEAD~N (confirmar antes)
 ```
 
-**Rule:** `/rollback apply` always creates a snapshot before executing.
+**Regla:** `/rollback apply` siempre crea un snapshot antes de ejecutar.
 
 ---
 
-## Safety Limits
+## Límites de seguridad
 
-- Snapshots are never deleted automatically
-- `restore` always creates a pre-restore backup before restoring
-- Do not include tokens or API keys in snapshots (sanitize automatically)
-- Maximum 50 snapshots before requiring `/snapshot prune`
+- Snapshots nunca se borran automáticamente
+- `restore` siempre hace pre-restore backup antes de restaurar
+- No incluir tokens ni API keys en snapshots (sanitizar automáticamente)
+- Máximo 50 snapshots antes de requerir `/snapshot prune`

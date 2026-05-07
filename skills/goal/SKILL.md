@@ -1,142 +1,142 @@
 ---
 name: goal
-description: "Persistent objectives that guide agent behavior across sessions. Activate with: /goal <objective>, /goal list, /goal clear <id>, /goal done <id> — or when the user says 'remember that...', 'my goal is...', 'don't forget that...'. Goals persist in ~/.claude/goals.md between conversations."
+description: "Objetivos persistentes que guían el comportamiento del agente entre sesiones. Activar con: /goal <objetivo>, /goal list, /goal clear <id>, /goal done <id> — o cuando el señor Ignacio diga 'quiero que recuerdes que...', 'mi objetivo es...', 'que no se te olvide que...'. Los goals persisten en ~/.claude/goals.md entre conversaciones."
 allowed-tools: Read, Write, Edit, Glob
 ---
 
-# Goal — Persistent Cross-Session Objectives
+# Goal — Objetivos Persistentes Cross-Sesión
 
-> Inspired by the `/goal` system of Hermes Agent (NousResearch).
-> Goals persist between sessions and guide agent behavior without repeating them each time.
-
----
-
-## Concept
-
-A **goal** is an objective that:
-1. Persists between sessions in `~/.claude/goals.md`
-2. Is loaded at the start of each session alongside `cerebro/index.md`
-3. Orients agent decisions without {{YOUR_NAME}} needing to repeat it
-4. Has states: `active` / `paused` / `done` / `cleared`
-
-**Difference from memory:**
-- Memory = accumulated knowledge from the past
-- Goal = objective that guides actions toward the future
+> Inspirado en el sistema `/goal` de Hermes Agent (NousResearch).
+> Los goals persisten entre sesiones y guían el comportamiento del agente sin repetirlos cada vez.
 
 ---
 
-## Persistence File
+## Concepto
 
-**Path:** `~/.claude/goals.md`
+Un **goal** es un objetivo que:
+1. Persiste entre sesiones en `~/.claude/goals.md`
+2. Se carga al inicio de cada sesión junto con `cerebro/index.md`
+3. Orienta las decisiones del agente sin que el señor Ignacio deba repetirlo
+4. Tiene estados: `active` / `paused` / `done` / `cleared`
 
-**Structure:**
+**Diferencia con memoria:**
+- Memoria = conocimiento acumulado del pasado
+- Goal = objetivo que guía acciones hacia el futuro
+
+---
+
+## Archivo de persistencia
+
+**Ruta:** `~/.claude/goals.md`
+
+**Estructura:**
 ```markdown
 # Goals — Jarvis
 
-## Active
+## Activos
 
 ### goal-001
 - **Status:** active
-- **Objective:** [goal description]
-- **Progress:** [progress notes — updated each session]
-- **Created:** YYYY-MM-DD HH:MM
-- **Deadline:** YYYY-MM-DD (optional)
+- **Objetivo:** [descripción del goal]
+- **Progreso:** [notas de avance — actualizar por sesión]
+- **Creado:** YYYY-MM-DD HH:MM
+- **Deadline:** YYYY-MM-DD (opcional)
 
 ---
 
-## Completed
+## Completados
 
 ### goal-000
 - **Status:** done
-- **Objective:** [description]
-- **Completed:** YYYY-MM-DD HH:MM
-- **Result:** [how it was achieved]
+- **Objetivo:** [descripción]
+- **Completado:** YYYY-MM-DD HH:MM
+- **Resultado:** [cómo se logró]
 ```
 
 ---
 
-## Commands
+## Comandos
 
-### `/goal <objective>` — Create goal
-
-```
-1. Read ~/.claude/goals.md (create if it doesn't exist)
-2. Generate ID: goal-XXX (next available number)
-3. Add under ## Active with status: active
-4. Respond: "Goal registered (goal-XXX): [objective]"
-```
-
-### `/goal list` — List goals
+### `/goal <objetivo>` — Crear goal
 
 ```
-1. Read ~/.claude/goals.md
-2. Show only status: active and paused
-3. Format: ID | Status | Objective | Days active
+1. Leer ~/.claude/goals.md (crear si no existe)
+2. Generar ID: goal-XXX (siguiente número disponible)
+3. Agregar bajo ## Activos con status: active
+4. Responder: "✅ Goal registrado (goal-XXX): [objetivo]"
 ```
 
-### `/goal done <id>` — Complete goal
+### `/goal list` — Listar goals
 
 ```
-1. Locate goal by ID
-2. Change status to: done
-3. Add completion timestamp + brief result in "Result"
-4. Move entry to ## Completed section
-5. Celebrate briefly: "Goal completed: [objective]"
+1. Leer ~/.claude/goals.md
+2. Mostrar solo status: active y paused
+3. Formato: ID | Status | Objetivo | Días activo
 ```
 
-### `/goal pause <id> [reason]` — Pause goal
+### `/goal done <id>` — Completar goal
 
 ```
-1. Change status to: paused
-2. Add "Pause reason: [reason]"
-3. The goal does not guide actions while paused
+1. Localizar goal por ID
+2. Cambiar status a: done
+3. Agregar timestamp de completación + resultado breveen "Resultado"
+4. Mover entrada a sección ## Completados
+5. Celebrar brevemente: "🎉 Goal completado: [objetivo]"
 ```
 
-### `/goal clear <id>` — Clear goal
+### `/goal pause <id> [razón]` — Pausar goal
 
 ```
-1. Change status to: cleared (NEVER delete — permanent audit trail)
-2. The goal disappears from /goal list but remains in the file
+1. Cambiar status a: paused
+2. Agregar "Razón de pausa: [razón]"
+3. El goal no guía acciones mientras está pausado
 ```
 
----
-
-## Automatic Integration in Sessions
-
-**At the start of each session** (additional step to the CLAUDE.md protocol):
+### `/goal clear <id>` — Limpiar goal
 
 ```
-1. Check if ~/.claude/goals.md exists
-2. If it exists → read goals with status: active
-3. If there are active goals → show: "Active goals: [short list]"
-4. Orient session actions toward the goals
-```
-
-**During the session:** If an architectural decision impacts an active goal → mention it.
-
----
-
-## Example Usage
-
-```
-{{YOUR_NAME}}: /goal Reach 85% autonomous capability by June 2026
-
-Agent: Goal registered (goal-001):
-       "85% autonomous — deadline: 2026-06-30"
-       I'll load this automatically each session and orient sprints toward it.
-```
-
-In the next session, without {{YOUR_NAME}} repeating it:
-```
-Agent: Active goal: "85% autonomous — 55 days remaining"
-       Today's sprint advances toward: FTS5 cerebro + unified gateway (+7%)
+1. Cambiar status a: cleared (NUNCA borrar — audit trail permanente)
+2. El goal desaparece de /goal list pero queda en el archivo
 ```
 
 ---
 
-## Safety Limits
+## Integración automática en sesiones
 
-- `~/.claude/goals.md` **is never deleted** — only status changes
-- Goals with `pinned: true` are immune to automatic `/goal clear`
-- Maximum 5 active goals simultaneously — if exceeded, suggest consolidating
-- Do not create contradictory goals — check for conflicts before registering
+**Al inicio de cada sesión** (paso adicional al protocolo del CLAUDE.md):
+
+```
+1. Verificar si ~/.claude/goals.md existe
+2. Si existe → leer goals con status: active
+3. Si hay goals activos → mostrar: "🎯 Goals activos: [lista corta]"
+4. Orientar las acciones de la sesión hacia los goals
+```
+
+**Durante la sesión:** Si una decisión arquitectónica impacta un goal activo → mencionarlo.
+
+---
+
+## Ejemplo de uso
+
+```
+señor Ignacio: /goal Jarvis al 85% de capacidad autónoma para junio 2026
+
+Jarvis: ✅ Goal registrado (goal-001):
+        🎯 "Jarvis al 85% autonomous — deadline: 2026-06-30"
+        Lo cargo automáticamente en cada sesión y oriento los sprints hacia él.
+```
+
+En la siguiente sesión, sin que el señor Ignacio lo repita:
+```
+Jarvis: 🎯 Goal activo: "Jarvis al 85% autonomous — 55 días restantes"
+        Sprint de hoy avanza hacia: FTS5 cerebro + gateway unificado (+7%)
+```
+
+---
+
+## Límites de seguridad
+
+- `~/.claude/goals.md` **nunca se borra** — solo cambios de status
+- Goals con `pinned: true` son inmunes a `/goal clear` automático
+- Máximo 5 goals activos simultáneamente — si se excede, sugerir consolidar
+- No crear goals contradictorios — verificar conflicto antes de registrar

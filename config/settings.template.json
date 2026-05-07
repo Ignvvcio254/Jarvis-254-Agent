@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(git push --force origin main)",
+      "Bash(git push --force origin master)",
+      "Bash(git reset --hard HEAD~*)",
+      "Bash(chmod -R 777 *)",
+      "Bash(sudo rm *)",
+      "Bash(del /f /s /q C:\\*)",
+      "Bash(rd /s /q C:\\*)"
+    ]
+  },
+  "model": "opusplan",
+  "env": {
+    "ECC_MCP_HEALTH_FAIL_OPEN": "true"
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python {{MODEL_ROUTER_PATH}}",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
+  "theme": "dark-ansi",
+  "voiceEnabled": true,
+  "effortLevel": "low"
+}

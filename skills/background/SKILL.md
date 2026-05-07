@@ -1,104 +1,104 @@
 ---
 name: background
-description: "Run prompts asynchronously while the conversation continues without interruption. Activate with: /background <prompt>, /bg <prompt>, /btw <prompt> — or when the user says 'run this in parallel', 'do it in the background', 'don't block me'. Do NOT use for tasks that require user confirmation before continuing."
+description: "Ejecuta prompts en segundo plano mientras la conversación continúa sin interrupciones. Activar con: /background <prompt>, /bg <prompt>, /btw <prompt> — o cuando el señor Ignacio diga 'ejecuta esto en paralelo', 'hazlo en background', 'no me bloquees'. NO USAR para tareas que requieran confirmación del usuario antes de continuar."
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Agent
 ---
 
-# Background — Non-Blocking Async Tasks
+# Background — Tareas Asíncronas No Bloqueantes
 
-> Inspired by the `/background` system of Hermes Agent (NousResearch).
-> Launch subtasks while the main conversation continues without interruption.
-
----
-
-## When to Use
-
-| Situation | Use background |
-|-----------|---------------|
-| Long build (> 30 seconds) | Yes |
-| Web crawl / fetch multiple URLs | Yes |
-| Heavy report generation | Yes |
-| Indexing / search across large codebase | Yes |
-| Simple task < 5 seconds | No — run directly |
-| Task that requires user confirmation | No — run interactively |
+> Inspirado en el sistema `/background` de Hermes Agent (NousResearch).
+> El agente lanza subtareas mientras la conversación principal continúa sin interrupciones.
 
 ---
 
-## Execution Protocol
+## ¿Cuándo usar?
 
-### Activation
+| Situación | Usar background |
+|-----------|----------------|
+| Build largo (> 30 segundos) | ✅ |
+| Crawl web / fetch múltiples URLs | ✅ |
+| Generación de reportes pesados | ✅ |
+| Indexación / búsqueda en codebase grande | ✅ |
+| Tarea simple < 5 segundos | ❌ — ejecutar directamente |
+| Tarea que requiere confirmación del usuario | ❌ — ejecutar interactivamente |
+
+---
+
+## Protocolo de Ejecución
+
+### Activación
 
 Trigger phrases:
-- `/background <prompt>` — launch immediately
-- `/bg <prompt>` — short alias
-- `/btw <prompt>` — "by the way, do this while..."
-- "run this in the background", "execute this in parallel", "don't block me with this"
+- `/background <prompt>` — lanza inmediatamente
+- `/bg <prompt>` — alias corto
+- `/btw <prompt>` — "by the way, hazlo mientras"
+- "hazlo en background", "ejecuta esto en paralelo", "no me bloquees con esto"
 
-### Step 1 — Acknowledge Immediately
+### Paso 1 — Acuse de recibo inmediato
 
-Before launching the task, respond:
+Antes de lanzar la tarea, responder en Discord:
 ```
-Launching in background: [short description]
-Continue the conversation — I'll notify you when it's done.
+⚡ Lanzando en background: [descripción corta]
+Continúa la conversación — te notifico cuando termine.
 ```
 
-### Step 2 — Launch Subtask
+### Paso 2 — Lanzar subtarea
 
-Use the `Agent` tool with `run_in_background: true`:
+Usar `Agent` tool con `run_in_background: true`:
 
 ```
 Agent({
-  description: "Background: [description]",
-  prompt: "[complete prompt with all context needed — worker starts cold]",
+  description: "Background: [descripción]",
+  prompt: "[prompt completo con todo el contexto necesario — el worker inicia frío]",
   run_in_background: true
 })
 ```
 
-**Critical rule:** The worker has no conversation context. The prompt must be completely self-contained:
-- Include absolute file paths
-- Include the expected final output
-- Include relevant constraints (don't delete, don't push, etc.)
+**Regla crítica:** El worker no tiene contexto de la conversación. El prompt debe ser completamente autocontenido:
+- Incluir rutas de archivos absolutas
+- Incluir el objetivo final esperado
+- Incluir restricciones relevantes (no borrar, no push, etc.)
 
-### Step 3 — Continue Main Conversation
+### Paso 3 — Continuar la conversación principal
 
-After launching, continue responding to the user normally. Do not block waiting for results.
+Después de lanzar, Jarvis continúa respondiendo al señor Ignacio normalmente. No bloquear esperando resultados.
 
-### Step 4 — Notify on Completion
+### Paso 4 — Notificación al completar
 
-When the background Agent completes, the notification arrives automatically. Then:
-- Send a new reply: "Background task complete: [description]\n\n[summary of results]"
-- If the result is long, attach as a `.md` file
+Cuando el Agent en background completa, Jarvis recibe la notificación automáticamente. Entonces:
+- Si el señor Ignacio está en Discord → `reply("✅ Background completó: [descripción]\n\n[resumen]")`
+- Si el resultado es largo → adjuntar como archivo `.md`
 
 ---
 
-## /queue — Prompt Queue
+## /queue — Cola de prompts
 
-`/queue <prompt>` or `/q <prompt>`: Enqueue a prompt to run on the **next turn**, without interrupting the current turn.
+`/queue <prompt>` o `/q <prompt>`: Encola un prompt para ejecutar en el **próximo turno**, sin interrumpir el turno actual.
 
-**Use:** When the user wants to add a task to run after the current one finishes.
+**Uso:** Cuando el señor Ignacio quiere agregar una tarea que se ejecute después de la actual.
 
-**Implementation:** Save the prompt as a note at the end of the current response:
+**Implementación:** Guardar el prompt en una nota al final de la respuesta actual:
 ```
 [QUEUE: {prompt}]
-At the start of the next turn, execute this prompt before responding to the new message.
+Al iniciar el siguiente turno, ejecutar este prompt antes de responder al nuevo mensaje.
 ```
 
 ---
 
-## /steer — Mid-Conversation Injection
+## /steer — Inyección mid-conversación
 
-`/steer <message>`: Adjust the agent's direction after the next tool call, without interrupting the current flow.
+`/steer <mensaje>`: Ajusta el rumbo del agente después del siguiente tool call, sin interrumpir el flujo.
 
-**Use:** When the user wants to correct direction without stopping execution in progress.
+**Uso:** Cuando el señor Ignacio quiere corregir dirección sin detener la ejecución en curso.
 
-**Implementation:** After completing the tool call in progress, insert the steer message as additional context before generating the next response.
+**Implementación:** Después de completar el tool call en progreso, insertar el mensaje de steer como contexto adicional antes de generar la siguiente respuesta.
 
 ---
 
-## Safety Limits
+## Límites de seguridad
 
-- **Never** run destructive tasks in background (delete, force-push, drop table)
-- **Always** include complete context in the worker prompt — it starts cold
-- **Maximum 3 background tasks simultaneously**
-- If the worker fails → notify with the error, never silently fail
-- Log to `~/.claude/cerebro/log.md`: `[date] background: [description] — [OK/FAIL]`
+- **Nunca** lanzar en background tareas destructivas (delete, force-push, drop table)
+- **Siempre** incluir contexto completo en el prompt del worker — inicia frío
+- **Máximo 3 tasks en background simultáneamente**
+- Si el worker falla → notificar con el error, nunca silenciar
+- Registrar en `cerebro/log.md`: `[fecha] background: [descripción] — [OK/FAIL]`

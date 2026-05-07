@@ -1,95 +1,116 @@
 ---
-name: memoria
-description: "Jarvis cerebro wiki management — session ingest, knowledge query, index lint. Slash command: /memoria [ingest|query <term>|lint|stats]"
+description: Opera el wiki interno de Jarvis — Sistema Global. Subcomandos: ingest (default), query, lint.
+argument-hint: "[ingest | query <pregunta> | lint]"
 ---
 
-# /memoria — Cerebro Wiki Management
+# /memoria
 
-> The cerebro wiki is Jarvis's long-term memory: session nodes, decision records, and accumulated technical context.
+Sos el operador del wiki de Jarvis — Sistema Global. El wiki es un knowledge base markdown vivo
+en `cerebro/` dentro de `C:/Users/w10/.claude/`. **Antes de hacer nada, leé `C:/Users/w10/.claude/cerebro/CLAUDE.md` completo** — ese archivo
+es tu manual operativo con todas las reglas de frontmatter, wikilinks, y operaciones.
 
-## Commands
+---
 
-### `/memoria ingest`
+## Detectar sub-operación
 
-Creates a session node from the current conversation. Run at the end of significant work sessions.
+Parseá `$ARGUMENTS`:
+- Vacío o `ingest` → modo **INGEST**.
+- Empieza con `query` → modo **QUERY** con el resto como pregunta.
+- `lint` → modo **LINT**.
+- Cualquier otra cosa → pedir aclaración al usuario y abortar.
 
-**Process:**
-1. Review the conversation — what was worked on, what decisions were made, what files were modified
-2. Create `~/.claude/cerebro/sessions/YYYY-MM-DD-<slug>.md` with frontmatter:
-   ```markdown
-   ---
-   title: <descriptive session title>
-   date: YYYY-MM-DD
-   area: <jarvis|ops|dev|design|personal>
-   tags: tag1, tag2, tag3
-   status: complete
-   ---
+---
+
+## Modo INGEST
+
+Objetivo: crear (o actualizar) un nodo de sesión en `C:/Users/w10/.claude/cerebro/sessions/` que capture
+lo que pasó en ESTA conversación.
+
+1. Leé `C:/Users/w10/.claude/cerebro/CLAUDE.md` y `C:/Users/w10/.claude/cerebro/index.md`.
+2. Revisá la conversación actual (todos los turnos previos). Identificá:
+   - Área(s) tocadas.
+   - Verbo de acción principal (definimos, migramos, decidimos, implementamos, debuggeamos).
+   - Output concreto: archivos creados/modificados, URLs.
+   - Decisiones importantes con rationale.
+   - Pendientes explícitos.
+3. Generá el slug: `YYYY-MM-DD-<kebab-case-corto>`. Fecha = hoy. El slug describe el
+   RESULTADO (no el proceso), máx. 6 palabras.
+4. ¿Existe ya un nodo con esa fecha y tema muy similar?
+   - **Sí** → UPDATE: leelo y appendeá a Decisions/Output/Pending bajo un sub-bloque
+     `### Update [HH:MM]`. No reescribas lo anterior.
+   - **No** → CREATE.
+5. CREATE: generá frontmatter completo siguiendo las reglas de `C:/Users/w10/.claude/cerebro/CLAUDE.md`.
+   - `related`: buscá en `C:/Users/w10/.claude/cerebro/index.md` nodos con tags solapados, misma área o
+     proximidad cronológica. Máx. 5.
+   - `sources`: paths de archivos de Jarvis tocados con prefijo `repo:`, URLs externas con prefijo `url:`.
+6. Escribí el cuerpo con las 6 secciones obligatorias. En Cross-refs usá `[[slug]]` con razón en una línea.
+7. **Bidireccionalidad obligatoria**: para cada nodo en `related`, abrilo y agregá un
+   bullet recíproco en su sección `## Cross-refs`: `[[este-nodo]] — razón`. Sin excepciones.
+8. Actualizá `C:/Users/w10/.claude/cerebro/index.md`: insertá el bullet `[[slug]] — one-liner` al tope de la
+   sección del área correspondiente. Si el área no existe, creala en orden alfabético.
+9. Append a `C:/Users/w10/.claude/cerebro/log.md`:
    ```
-3. Body includes: Summary, Key Decisions, Files Modified, Lessons Learned, Next Steps
-4. Update `~/.claude/cerebro/index.md` — add node to catalog
-5. Append to `~/.claude/cerebro/log.md`
-6. Run `python ~/.claude/cerebro/search.py index` to update FTS5 index
-7. Confirm: "Session node created: YYYY-MM-DD-<slug>"
+   ## [YYYY-MM-DD HH:MM] ingest | <slug>
+   - Área: <area>
+   - Cross-refs: <lista de slugs relacionados o "ninguna">
+   ```
+10. Reportá al usuario: path del nodo creado/actualizado, cross-refs agregadas, y si
+    hubo alguna decisión ambigua.
 
-### `/memoria query <term>`
-
-Search accumulated knowledge using FTS5 BM25 ranking.
-
-**Process:**
-1. Run `python ~/.claude/cerebro/search.py query "<term>"`
-2. Present results with title, area, date, and excerpt
-3. For the most relevant result, offer to open and read the full node
-
-### `/memoria lint`
-
-Verify cerebro wiki health.
-
-**Checks:**
-- `index.md` exists and has node entries
-- `log.md` exists and is readable
-- All nodes referenced in `index.md` exist as files
-- `search.py` runs without errors
-- FTS5 database is up to date
-
-Output: PASS / WARN / FAIL with specific issues.
-
-### `/memoria stats`
-
-Show cerebro wiki statistics (delegates to `python search.py stats`).
-
-## Session Node Template
-
-```markdown
----
-title: <What was worked on>
-date: YYYY-MM-DD
-area: <jarvis|ops|dev|design|personal>
-tags: tag1, tag2, tag3
-status: complete
 ---
 
-## Summary
+## Modo QUERY
 
-<2-3 sentence summary of what was accomplished>
+Objetivo: responder una pregunta usando el wiki como base, con citations verificables.
 
-## Key Decisions
+1. Leé `C:/Users/w10/.claude/cerebro/CLAUDE.md` y `C:/Users/w10/.claude/cerebro/index.md` completos.
+2. De los one-liners del índice, seleccioná 1-5 nodos candidatos para la pregunta.
+   Si ninguno parece relevante, decilo y sugerí ampliar la búsqueda.
+3. Leé esos nodos completos.
+4. Si la pregunta depende del contenido actual de un archivo del repo, leerlo directamente con Read. El wiki guarda punteros, no copias.
+5. Sintetizá respuesta en 2-5 párrafos. Citations usando wikilinks:
+   `[[slug-del-nodo]]`.
+   **NO uses markdown links** `[texto](ruta)` para nodos del wiki.
+6. Si detectás un gap (cross-ref obvio faltante, concepto en 3+ nodos sin nodo propio),
+   NO lo arreglés — reportalo al final como "Sugerencia para `/memoria lint`".
+7. Si no hay info suficiente en el wiki, decilo explícitamente. **No inventes** ni
+   extrapoles más allá de lo que dicen los nodos.
 
-- Decision 1: [what was decided and why]
-- Decision 2: [what was decided and why]
+---
 
-## Files Modified
+## Modo LINT
 
-- `path/to/file.ts` — what changed
-- `path/to/config.json` — what changed
+Objetivo: reportar el estado de salud del wiki **SIN modificar archivos**.
 
-## Lessons Learned
+1. Leé `C:/Users/w10/.claude/cerebro/CLAUDE.md`, `C:/Users/w10/.claude/cerebro/index.md` y **todos** los archivos en `C:/Users/w10/.claude/cerebro/sessions/`.
+2. Revisá cada categoría según las reglas de lint de `C:/Users/w10/.claude/cerebro/CLAUDE.md`.
+3. Devolvé un reporte markdown estructurado:
 
-- What worked well
-- What to avoid next time
-- Non-obvious discoveries
+   ```markdown
+   # Lint report — YYYY-MM-DD HH:MM
 
-## Next Steps
+   ## Resumen
+   - Nodos totales: N
+   - Issues críticos: N (broken wikilinks, frontmatter inválido, índice desincronizado)
+   - Issues medios: N (orphans, missing cross-refs)
+   - Oportunidades: N (conceptos emergentes, stale claims)
 
-- [ ] Pending task 1
-- [ ] Pending task 2
-```
+   ## Críticos
+   ### Broken wikilinks
+   - `[[slug-inexistente]]` en `2026-04-XX-nodo.md` → sugerir corrección
+
+   ## Medios
+   ### Orphan nodes
+   - `[[slug]]` — sin inbound links. Sugerencia: cross-ref desde [[nodo-relacionado]].
+
+   ## Oportunidades
+   ### Conceptos emergentes
+   - "término" aparece en 3 nodos. Candidato a `type: concept`.
+   ```
+
+4. **NO modificar archivos.**
+5. Append a `C:/Users/w10/.claude/cerebro/log.md`:
+   ```
+   ## [YYYY-MM-DD HH:MM] lint | report
+   - Críticos: N | Medios: N | Oportunidades: N
+   ```

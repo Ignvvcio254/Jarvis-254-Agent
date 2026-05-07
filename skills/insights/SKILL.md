@@ -1,108 +1,117 @@
 ---
 name: insights
-description: "Generate activity reports and analytics from Jarvis sessions. Activate with: /insights, /insights --days 30, /insights --area jarvis — or when the user asks for 'stats', 'activity summary', 'what have we done', 'how much progress'. Inspired by Hermes Agent's analytics system."
+description: "Genera reportes de actividad y analytics de sesiones de Jarvis. Activar con: /insights, /insights --days 30, /insights --area jarvis — o cuando el usuario pida 'estadísticas', 'resumen de actividad', 'qué hemos hecho', 'cuánto hemos avanzado'. Inspirado en el sistema de analytics de Hermes Agent."
 allowed-tools: Read, Glob, Bash
 ---
 
-# Insights — Session Analytics
+# Insights — Analytics de Sesiones Jarvis
 
-> Read-only analytics over the cerebro wiki. Reports activity, areas worked, session patterns, and goal velocity.
-
----
-
-## Commands
-
-- `/insights` — Full report (last 30 days by default)
-- `/insights --days N` — Report for last N days
-- `/insights --area <area>` — Filter by area (jarvis, ops, dev, design, personal)
+> Inspirado en el sistema `/insights` de Hermes Agent (NousResearch).
+> Analiza el cerebro/ wiki para generar métricas de actividad, áreas trabajadas y patrones de sesión.
 
 ---
 
-## Generation Protocol
+## Comandos
 
-### Step 1 — Gather Data
+- `/insights` — Reporte completo (últimos 30 días por defecto)
+- `/insights --days N` — Reporte de los últimos N días
+- `/insights --area <area>` — Filtrar por área (jarvis, ops, dev, design, personal)
+
+---
+
+## Protocolo de Generación
+
+### Paso 1 — Recopilar datos
 
 ```
-1. Read ~/.claude/cerebro/log.md
-   - Parse entries: ## [YYYY-MM-DD HH:MM] operation | slug
-   - Filter by requested day range
+1. Leer ~/.claude/cerebro/log.md
+   - Parsear entradas: ## [YYYY-MM-DD HH:MM] operacion | slug
+   - Filtrar por rango de días solicitado
 
 2. Glob ~/.claude/cerebro/sessions/*.md
-   - Read frontmatter: title, area, date, tags, status
+   - Leer frontmatter: title, area, date, tags, status
 
-3. Read ~/.claude/cerebro/index.md
-   - Extract: total nodes, active areas, last update
+3. Leer ~/.claude/cerebro/index.md
+   - Extraer: Total nodes, áreas activas, última actualización
 
-4. Read ~/.claude/goals.md (if exists)
-   - Load active goals to compute progress
+4. Leer ~/.claude/goals.md (si existe)
+   - Cargar goals activos para calcular progreso
 ```
 
-### Step 2 — Compute Metrics
+### Paso 2 — Calcular métricas
 
-| Metric | How to compute |
-|--------|----------------|
-| Total sessions | Count of files in sessions/ within period |
-| Most active areas | Frequency of `area` in session frontmatter |
-| Frequent tags | Top 10 tags across all sessions in period |
-| Operations in log | Count by type: ingest, update, curator, lint |
-| Active streak | Consecutive days with at least 1 session |
-| Nodes created | Count of `ingest` operations in log.md |
+| Métrica | Cómo calcular |
+|---------|--------------|
+| Sesiones totales | Count de archivos en sessions/ dentro del período |
+| Áreas más activas | Frecuencia de `area` en frontmatter de sesiones |
+| Tags frecuentes | Top 10 tags en todas las sesiones del período |
+| Operaciones en log | Count por tipo: ingest, update, curator, lint, etc. |
+| Racha de días activos | Días consecutivos con al menos 1 sesión |
+| Nodos creados | Count de operaciones `ingest` en log.md |
 
-### Step 3 — Generate Report
+### Paso 3 — Generar reporte
 
-**Terminal format:**
+**Formato terminal (en conversación):**
 ```
-## 📊 Insights — Last 30 days
+## 📊 Insights — Últimos 30 días
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📁 Sessions: 12
-📝 Cerebro nodes: 8 sessions
-🗓️  Period: YYYY-MM-DD → YYYY-MM-DD
+📁 Sesiones: 12
+📝 Nodos en cerebro: 8 sesiones | 1 user-model
+🗓️  Período: YYYY-MM-DD → YYYY-MM-DD
 
-### Most active areas
-1. jarvis    ████████████ 6 sessions (50%)
-2. ops       ████████     4 sessions (33%)
-3. dev       ████         2 sessions (17%)
+### Áreas más activas
+1. jarvis    ████████████ 6 sesiones (50%)
+2. ops       ████████     4 sesiones (33%)
+3. dev       ████         2 sesiones (17%)
 
-### Operations in log
+### Operaciones en log
 - ingest: 8 | update: 4 | curator: 0 | lint: 1
 
-### Frequent tags
-hermes-agent, jarvis, gsap, skills, memory
+### Tags frecuentes
+hermes-agent, jarvis, tryvex, gsap, skills, memory
 
-### Active goals
-🎯 goal-001: "Ship v1.0 — 55 days remaining"
-   Current progress: 63% | Velocity: ~0.5%/day ✅
+### Goals activos
+🎯 goal-001: "Jarvis 85% autonomous — 55 días restantes"
+   Progreso actual: 63% | Velocidad: ~0.5%/día ✅
 
-### Current streak
-🔥 3 consecutive active days
+### Racha actual
+🔥 3 días activos consecutivos
+```
+
+**Formato gateway (Discord, condensado):**
+```
+📊 **Insights (30d):** 12 sesiones | 8 nodos
+🔝 Áreas: jarvis (6) > ops (4) > dev (2)
+🏷️  Tags top: hermes-agent, jarvis, tryvex
+📈 Goal-001: Jarvis 63% → 85% | 55d restantes
 ```
 
 ---
 
-## Velocity Analysis
+## Análisis adicional — Velocidad de progreso
 
-For each active goal with a deadline:
+Si hay un goal activo con deadline:
 ```
-Goal: [goal text]
-Current progress: X%
-Days remaining: N
-Required velocity: ~X% per day
-Actual velocity (last 2 weeks): ~Y% per day
-Status: ✅ on track / ⚠️ behind
+Goal: [texto del goal]
+Progreso actual: X%
+Días restantes: N
+Velocidad necesaria: ~X% por día
+Velocidad actual (últimas 2 semanas): ~Y% por día
+Estado: ✅ en ritmo / ⚠️ rezagado
 ```
 
-## Proactive Suggestion
+## Sugerencia proactiva al final
 
-Always include at the end of the report:
+Siempre incluir al final del reporte:
 ```
-💡 Highest impact next: [highest-value pending task from cerebro/sessions/]
+💡 Mayor impacto siguiente: [tarea de mayor valor de cerebro/sessions/ pendiente]
 ```
 
 ---
 
-## Limits
+## Límites
 
-- Read-only — never modifies cerebro files
-- If cerebro/ doesn't exist → "No session data yet. Use /memoria ingest to begin."
-- For periods > 90 days, warn that data may be incomplete
+- Solo lectura — nunca modifica archivos de cerebro/
+- Si cerebro/ no existe → "Sin datos de sesión aún. Usa /memoria ingest para comenzar."
+- Para períodos > 90 días, advertir que los datos pueden estar incompletos

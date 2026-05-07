@@ -9,15 +9,15 @@
 
 | Area | Nodes | Last Updated |
 |------|-------|--------------|
-| jarvis | 0 | — |
+| jarvis | 1 | 2026-05-06 |
 | ops | 0 | — |
-| dev | 0 | — |
+| dev | 1 | 2026-05-06 |
 
 ---
 
 ## Node Catalog
 
-*(empty — nodes are added by /memoria ingest after each work session)*
+- `cerebro/sessions/2026-05-06-hermes-agent-benchmark.md` — Benchmark externo de `NousResearch/hermes-agent` con recomendaciones de adopcion para Jarvis-254-Agent.
 
 ---
 
