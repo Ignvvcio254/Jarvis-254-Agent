@@ -249,7 +249,6 @@ python jarvis_doctor.py
 | [`docs/commands.md`](docs/commands.md) | All slash commands and their behavior |
 | [`docs/command-skill-matrix.md`](docs/command-skill-matrix.md) | Command → skill → workflow mapping |
 | [`docs/skills-guide.md`](docs/skills-guide.md) | How to navigate 1400+ skills |
-| [`docs/saas-factory.md`](docs/saas-factory.md) | PRP + agentic workflow system |
 | [`docs/runtime-lite.md`](docs/runtime-lite.md) | `jarvis_runtime.py` full reference |
 | [`docs/context-compression.md`](docs/context-compression.md) | Token optimization: protect_n + FTS5 |
 | [`docs/hermes-adoption.md`](docs/hermes-adoption.md) | What we adopted from Hermes and why |
