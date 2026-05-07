@@ -309,7 +309,7 @@ python jarvis_runtime.py <command>
 |---|---|---|---|
 | [NousResearch/hermes-agent](https://github.com/nousresearch/hermes-agent) | ⭐ 134k | Curator pattern, `protect_first_n/last_n`, FTS5 memory, doctor diagnostics | MIT |
 | [Antigravity / Everything Claude Code](https://github.com/anthropics/everything-claude-code) | ⭐ Community | 1400+ skill pack, skill schema, agent orchestration | MIT |
-| [SaaS System](https://github.com/Agentic-Insights/saas-factory) | ⭐ Community | PRP system, bucle agéntico, phased workflow | MIT |
+| SaaS System | ⭐ Community | PRP system, bucle agéntico, phased workflow | MIT |
 | [claude-brain](https://github.com/AgustinGoniDev/claude-brain-skill) | ⭐ Community | cerebro/ wiki system, session continuity contract | MIT |
 | [Anthropic Claude Code](https://github.com/anthropics/claude-code) | — | The agent runtime everything runs on | © Anthropic |
 
