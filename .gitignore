@@ -36,3 +36,4 @@ quarantine/
 
 # Optional upstream references (not required in clone)
 upstream/
+cerebro/cerebro_fts.db
