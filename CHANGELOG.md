@@ -15,7 +15,7 @@ Versionado con [SemVer](https://semver.org/lang/es/).
 - Runtime ejecutable `jarvis_runtime.py` con subcomandos: `doctor`, `providers`, `plan`, `session`, `memory`.
 - Diagnóstico `jarvis_doctor.py` con modo `--repo-only` para validación de instalación.
 - Comandos slash en `commands/` (memoria, consumo, ag-project, etc.).
-- Sistema SaaS Factory + PRP + bucle agéntico para features complejas.
+- Sistema SaaS System + PRP + bucle agéntico para features complejas.
 - Reglas por stack en `rules/` (common, web, mobile, backend).
 - Templates MCP provider-agnostic en `mcp/`.
 - Documentación reorganizada en `docs/` — root limpio con 5 archivos top-level.

@@ -9,7 +9,7 @@
 | [skills-guide.md](skills-guide.md) | Guía de navegación del pack de 1400+ skills |
 | [rules-guide.md](rules-guide.md) | Índice y estrategia de aplicación de reglas por stack |
 | [design-systems.md](design-systems.md) | Índice y guía de selección visual |
-| [saas-factory.md](saas-factory.md) | Arquitectura, flujo y contratos del sistema SaaS Factory + PRP |
+| [saas-factory.md](saas-factory.md) | Arquitectura, flujo y contratos del sistema SaaS System + PRP |
 | [runtime-lite.md](runtime-lite.md) | Guía operacional de `jarvis_runtime.py` |
 | [sanitization.md](sanitization.md) | Política de sanitización y cuarentena de artefactos |
 | [hermes-adoption.md](hermes-adoption.md) | Playbook de adopción de patrones desde NousResearch/hermes-agent |

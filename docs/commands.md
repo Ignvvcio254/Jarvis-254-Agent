@@ -109,7 +109,7 @@ Checklist rápido para revisión documental:
 - Integraciones externas: `/connect-apps-setup`
 - Diagnóstico del sistema: `/doctor`
 
-## Relación con SaaS Factory
+## Relación con SaaS System
 
 - `/ag-project` crea base de proyecto para ejecución ordenada.
 - `/memoria` documenta decisiones y continuidad.

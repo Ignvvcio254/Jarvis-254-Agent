@@ -26,7 +26,7 @@ No todas las skills se invocan con slash command directo. En este repo existen d
 - **Comando slash en `commands/`**: interfaz explícita para tareas operativas (ej. `/memoria`).
 - **Activación por workflow/trigger**: la skill se invoca por contexto, no por slash command textual.
 
-Para el sistema SaaS Factory:
+Para el sistema SaaS System:
 
 - Preparación estructural: `commands/ag-project.md`
 - Planificación: `skills/prp/SKILL.md`

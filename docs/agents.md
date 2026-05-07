@@ -2,7 +2,7 @@
 
 ## Scope
 
-Este repositorio empaqueta una capa cognitiva portable para Claude Code (Jarvis): instrucciones base, memoria wiki, comandos slash, SaaS Factory y pack de skills.
+Este repositorio empaqueta una capa cognitiva portable para Claude Code (Jarvis): instrucciones base, memoria wiki, comandos slash, SaaS System y pack de skills.
 
 ## Objetivo operativo
 

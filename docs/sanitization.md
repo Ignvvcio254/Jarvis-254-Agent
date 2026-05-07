@@ -21,7 +21,7 @@ Fuentes evaluadas desde `C:\Users\w10\.claude`:
 - `design-systems/` (documentación visual y assets)
 - `commands/` (comandos slash documentados)
 - `skills/` (pack completo, solo `SKILL.md` por skill)
-- `PRPs/prp-base.md` (template base SaaS Factory)
+- `PRPs/prp-base.md` (template base SaaS System)
 - plantillas sanitizadas en `config/` y `mcp/`
 
 ## Excluido (cuarentena)

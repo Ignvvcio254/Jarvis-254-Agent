@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Instalar Jarvis de forma portable y segura, con comandos, memoria, skills y base SaaS Factory listos para operar.
+Instalar Jarvis de forma portable y segura, con comandos, memoria, skills y base SaaS System listos para operar.
 
 ## Requisitos
 
@@ -84,7 +84,7 @@ Comandos clave instalados:
 - `/marketing-swarm`
 - `/connect-apps-setup`
 
-## 6) Instalar base SaaS Factory (PRP)
+## 6) Instalar base SaaS System (PRP)
 
 ```bash
 mkdir -p ~/.claude/PRPs
@@ -171,7 +171,7 @@ Notas:
 - `upstream/` es opcional y está excluido de git.
 - Sirve para análisis comparativo y extracción de patrones, no para runtime obligatorio.
 
-## Verificación SaaS Factory
+## Verificación SaaS System
 
 ```text
 /ag-project demo-saas fullstack

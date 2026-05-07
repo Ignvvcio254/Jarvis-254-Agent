@@ -20,7 +20,7 @@ Hay dos capas complementarias:
 | `/connect-apps-setup` | Configuración de conectores externos | skills de automatización/integración (según uso) | Directa por slash command |
 | `/doctor` | Diagnóstico rápido de instalación y operación | `claude-engineer` + reglas de seguridad operativa | Directa por slash command |
 
-## Matriz skill SaaS Factory → comando de soporte
+## Matriz skill SaaS System → comando de soporte
 
 | Skill | Función | Comando de soporte recomendado |
 |---|---|---|

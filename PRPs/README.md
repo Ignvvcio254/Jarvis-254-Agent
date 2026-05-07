@@ -1,6 +1,6 @@
 # PRPs Directory
 
-Directorio de plantillas y artefactos PRP (Product Requirements Proposal) para el sistema SaaS Factory.
+Directorio de plantillas y artefactos PRP (Product Requirements Proposal) para el sistema SaaS System.
 
 ## Contenido
 

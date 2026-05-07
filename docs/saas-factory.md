@@ -1,8 +1,8 @@
-# SaaS Factory System
+# SaaS System System
 
-Guía operativa del sistema SaaS Factory integrado en Jarvis.
+Guía operativa del sistema SaaS System integrado en Jarvis.
 
-## Qué es SaaS Factory
+## Qué es SaaS System
 
 Framework de ejecución para features complejas con control de contexto, planificación previa y despliegue por fases.
 
@@ -61,7 +61,7 @@ Base conceptual:
 - Documentar decisiones arquitectónicas y pendientes.
 - Verificar cada fase antes de pasar a la siguiente.
 
-## Señales para activar SaaS Factory
+## Señales para activar SaaS System
 
 Activar cuando la tarea involucra uno o más:
 

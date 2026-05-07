@@ -603,4 +603,4 @@ export const glass = {
 
 ---
 
-*Este documento es parte del Design System de SaaS Factory V2.*
+*Este documento es parte del Design System de SaaS System V2.*

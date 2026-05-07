@@ -40,7 +40,7 @@ La mayoría de los setups de agentes IA son buenos **de forma aislada**.
 
 **Jarvis-254-Agent los unifica.**
 
-Toma los mejores patrones del ecosistema open source — NousResearch/hermes-agent, Antigravity, SaaS Factory, claude-brain, y más — y los compone en un **sistema único, estructurado y portable** que puedes clonar en minutos y usar inmediatamente.
+Toma los mejores patrones del ecosistema open source — NousResearch/hermes-agent, Antigravity, SaaS System, claude-brain, y más — y los compone en un **sistema único, estructurado y portable** que puedes clonar en minutos y usar inmediatamente.
 
 > 💡 **No somos dueños de ninguno de estos sistemas. Los curamos, acreditamos y componemos.**
 
@@ -75,7 +75,7 @@ python jarvis_runtime.py memory search "patrones de autenticación"
 | Skills que se degradan y quedan obsoletas | Auto-curador marca las obsoletas, archiva las antiguas |
 | Lock-in de un solo proveedor | Adaptador multi-proveedor con cadena de fallback |
 | Archivos de prompts planos y dispersos | CLAUDE.md estructurado como contrato operativo |
-| Sin sistema de workflows | SaaS Factory: PRP + bucle agéntico |
+| Sin sistema de workflows | SaaS System: PRP + bucle agéntico |
 | Consumo ilimitado de contexto | Compresión protect_n (patrón Hermes) |
 | Comportamiento genérico del agente | 1400+ skills procedurales por dominio |
 
@@ -94,7 +94,7 @@ Jarvis-254-Agent/
 ├── 🎯 skills/                ← 1400+ skills procedurales por dominio
 ├── 📏 rules/                 ← Reglas de ingeniería por stack
 ├── 💾 cerebro/               ← Wiki de memoria persistente (indexado con FTS5)
-├── 📋 PRPs/                  ← Product Requirement Prompts (SaaS Factory)
+├── 📋 PRPs/                  ← Product Requirement Prompts (SaaS System)
 │
 ├── 🔧 jarvis_core/
 │   ├── cerebro_index.py      ← Búsqueda FTS5 BM25 + ContextCompressor
@@ -118,7 +118,7 @@ graph TD
     A[Mensaje del Usuario] --> B{CLAUDE.md\nContrato Operativo}
     B --> C[Activación de Skills\n1400+ skills]
     B --> D[Búsqueda en Memoria\nFTS5 / BM25]
-    B --> E[Sistema de Workflows\nSaaS Factory + PRP]
+    B --> E[Sistema de Workflows\nSaaS System + PRP]
 
     C --> F[Bucle Agéntico\nbucle-agéntico]
     D --> F
@@ -222,7 +222,7 @@ Adoptado de [NousResearch/hermes-agent](https://github.com/nousresearch/hermes-a
 
 ---
 
-## 🔄 SaaS Factory — Workflow Agéntico
+## 🔄 SaaS System — Workflow Agéntico
 
 Para features complejas, usa el sistema PRP:
 
@@ -309,7 +309,7 @@ python jarvis_runtime.py <comando>
 |---|---|---|---|
 | [NousResearch/hermes-agent](https://github.com/nousresearch/hermes-agent) | ⭐ 134k | Patrón curator, `protect_first_n/last_n`, memoria FTS5, diagnósticos doctor | MIT |
 | [Antigravity / Everything Claude Code](https://github.com/anthropics/everything-claude-code) | ⭐ Comunidad | Pack de 1400+ skills, schema de skills, orquestación de agentes | MIT |
-| [SaaS Factory](https://github.com/Agentic-Insights/saas-factory) | ⭐ Comunidad | Sistema PRP, bucle agéntico, workflow por fases | MIT |
+| [SaaS System](https://github.com/Agentic-Insights/saas-factory) | ⭐ Comunidad | Sistema PRP, bucle agéntico, workflow por fases | MIT |
 | [claude-brain](https://github.com/AgustinGoniDev/claude-brain-skill) | ⭐ Comunidad | Sistema wiki cerebro/, contrato de continuidad de sesión | MIT |
 | [Anthropic Claude Code](https://github.com/anthropics/claude-code) | — | El runtime de agente sobre el que todo corre | © Anthropic |
 

@@ -775,4 +775,4 @@ transition-all duration-150  <!-- Moderado -->
 
 ---
 
-*Este documento es parte del Design System de SaaS Factory V2.*
+*Este documento es parte del Design System de SaaS System V2.*
