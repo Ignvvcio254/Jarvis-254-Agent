@@ -1,6 +1,6 @@
 ---
 name: background
-description: "Ejecuta prompts en segundo plano mientras la conversación continúa sin interrupciones. Activar con: /background <prompt>, /bg <prompt>, /btw <prompt> — o cuando el señor Ignacio diga 'ejecuta esto en paralelo', 'hazlo en background', 'no me bloquees'. NO USAR para tareas que requieran confirmación del usuario antes de continuar."
+description: "Ejecuta prompts en segundo plano mientras la conversación continúa sin interrupciones. Activar con: /background <prompt>, /bg <prompt>, /btw <prompt> — o cuando el usuario diga 'ejecuta esto en paralelo', 'hazlo en background', 'no me bloquees'. NO USAR para tareas que requieran confirmación del usuario antes de continuar."
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Agent
 ---
 
@@ -61,12 +61,12 @@ Agent({
 
 ### Paso 3 — Continuar la conversación principal
 
-Después de lanzar, Jarvis continúa respondiendo al señor Ignacio normalmente. No bloquear esperando resultados.
+Después de lanzar, Jarvis continúa respondiendo al usuario normalmente. No bloquear esperando resultados.
 
 ### Paso 4 — Notificación al completar
 
 Cuando el Agent en background completa, Jarvis recibe la notificación automáticamente. Entonces:
-- Si el señor Ignacio está en Discord → `reply("✅ Background completó: [descripción]\n\n[resumen]")`
+- Si el usuario está en Discord → `reply("✅ Background completó: [descripción]\n\n[resumen]")`
 - Si el resultado es largo → adjuntar como archivo `.md`
 
 ---
@@ -75,7 +75,7 @@ Cuando el Agent en background completa, Jarvis recibe la notificación automáti
 
 `/queue <prompt>` o `/q <prompt>`: Encola un prompt para ejecutar en el **próximo turno**, sin interrumpir el turno actual.
 
-**Uso:** Cuando el señor Ignacio quiere agregar una tarea que se ejecute después de la actual.
+**Uso:** Cuando el usuario quiere agregar una tarea que se ejecute después de la actual.
 
 **Implementación:** Guardar el prompt en una nota al final de la respuesta actual:
 ```
@@ -89,7 +89,7 @@ Al iniciar el siguiente turno, ejecutar este prompt antes de responder al nuevo 
 
 `/steer <mensaje>`: Ajusta el rumbo del agente después del siguiente tool call, sin interrumpir el flujo.
 
-**Uso:** Cuando el señor Ignacio quiere corregir dirección sin detener la ejecución en curso.
+**Uso:** Cuando el usuario quiere corregir dirección sin detener la ejecución en curso.
 
 **Implementación:** Después de completar el tool call en progreso, insertar el mensaje de steer como contexto adicional antes de generar la siguiente respuesta.
 

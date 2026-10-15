@@ -57,7 +57,7 @@ PASO 4: CONSOLIDACIÓN
   Añadir nota en A y B: "archived: absorbed into C — YYYY-MM-DD"
   NUNCA usar contadores de uso como único criterio de fusión
 
-PASO 5: REPORTE al señor Ignacio
+PASO 5: REPORTE al usuario
   Skills revisados: N | Fusiones: X | Archivados: Y | Pinned (intocados): Z
   Candidatos para revisión manual: [lista con razón]
   Append a cerebro/log.md: "[YYYY-MM-DD] curator run: X fusiones, Y archivados"
@@ -66,7 +66,7 @@ PASO 5: REPORTE al señor Ignacio
 ### Invariantes de seguridad (del Hermes curator)
 - Solo actúa sobre `~/.claude/skills/` — NUNCA skills del sistema o plugins externos
 - Archiva en `~/.claude/skills/_archived/YYYY-MM-DD-nombre/` (siempre recuperable)
-- Ante cualquier duda → proponer al señor Ignacio, no ejecutar
+- Ante cualquier duda → proponer al no ejecutar
 - Registrar cada acción en `cerebro/log.md`
 
 ---

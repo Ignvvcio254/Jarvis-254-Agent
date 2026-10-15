@@ -53,17 +53,32 @@ It takes the best patterns from the open-source community — NousResearch/herme
 git clone https://github.com/Ignvvcio254/Jarvis-254-Agent.git
 cd Jarvis-254-Agent
 
-# 2. Diagnose your setup instantly
+# 2. Install skills, agents, hooks and the multi-model gateway (merges, never overwrites)
+python install.py            # --dry-run to preview
+
+# 3. Diagnose your setup instantly
 python jarvis_doctor.py --repo-only
 
-# 3. Plan your first task
+# 4. Plan your first task
 python jarvis_runtime.py plan --intent "build a REST API with FastAPI"
 
-# 4. Search your memory wiki (FTS5 BM25 — zero deps)
+# 5. Search your memory wiki (FTS5 BM25 — zero deps)
 python jarvis_runtime.py memory search "authentication patterns"
 ```
 
 > ✅ No npm. No Docker. No cloud account required.
+
+---
+
+## 🆕 v0.2 — Harness, autopilot hooks & any model
+
+| | What you get | Docs |
+|---|---|---|
+| ✅ **Objective verdicts** | `verify-repair` + `verify-gate.ps1`: a task is done when checks pass, not when the model says so. A `Stop` hook blocks "done" on unverified code. | [harness](docs/harness.md) |
+| 🤖 **Autopilot hooks** | Session resume, task-archetype router, correction capture, destructive-action guard, pre-compaction checkpoint. | [harness](docs/harness.md) |
+| 💸 **Token economy** | `token-router` + `agent-uplift`: the cheapest model that can do the job, lifted with specs + verify-repair loops. | [harness](docs/harness.md) |
+| 🧩 **Any model in `/model`** | Local gateway: Claude untouched + NVIDIA NIM, Gemini, Groq, Mistral, Cerebras, xAI, OpenRouter, Ollama, and `auto/*` fallback chains. | [models](docs/models.md) |
+| 🕸 **Orchestration** | 9 subagents (planner, reviewers, TDD, silent-failure hunter, cheap worker), `subagent-orchestration`, `multi-cli`, `long-run-harness`. | [harness](docs/harness.md) |
 
 ---
 
@@ -343,7 +358,7 @@ python jarvis_doctor.py
 Replace placeholders in `CLAUDE.md`:
 
 ```
-{{YOUR_NAME}}        → your name (e.g. "Ignacio")
+{{YOUR_NAME}}        → your name (e.g. "Ada")
 {{YOUR_REPO}}        → your main repo path
 {{YOUR_SHELL}}       → bash / zsh / powershell
 {{YOUR_OS}}          → Windows / macOS / Linux

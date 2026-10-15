@@ -578,8 +578,8 @@ Se a API da Anthropic estiver indisponivel, o sistema retorna respostas pre-conf
 | Alexa Skills Store Brasil | https://www.amazon.com.br/alexa-skills |
 | DynamoDB Best Practices | https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/best-practices.html |
 | In-Skill Purchasing | https://developer.amazon.com/en-US/docs/alexa/in-skill-purchase/isp-overview.html |
-| Codigo-fonte Auri | C:/Users/renat/skills/auri-core/ |
-| Amazon Alexa Skill (skill tecnica) | C:/Users/renat/skills/amazon-alexa/SKILL.md |
+| Codigo-fonte Auri | ~/skills/auri-core/ |
+| Amazon Alexa Skill (skill tecnica) | ~/skills/amazon-alexa/SKILL.md |
 
 ---
 

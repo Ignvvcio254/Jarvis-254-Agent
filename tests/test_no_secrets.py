@@ -45,3 +45,18 @@ def test_no_secrets_in_repo():
                 rel = path.relative_to(REPO_ROOT)
                 hits.append(f"{rel}: {match.group()[:16]}…")
     assert not hits, "Real secrets found in repo:\n" + "\n".join(hits[:10])
+
+
+# Rutas absolutas a la carpeta de un usuario real: atan el repo a una máquina.
+PERSONAL_PATH = re.compile(r"[Cc]:[\/]+Users[\/]+(?!<|\{|\$|%|YOUR|you|user|USER|Public|name)[A-Za-z0-9._-]+")
+
+
+def test_no_hardcoded_user_home():
+    hits = []
+    for path in iter_text_files():
+        if path.name == "test_no_secrets.py":
+            continue
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        for m in PERSONAL_PATH.finditer(text):
+            hits.append(f"{path.relative_to(REPO_ROOT)}: {m.group()}")
+    assert not hits, "Rutas personales en el repo:\n" + "\n".join(hits[:10])

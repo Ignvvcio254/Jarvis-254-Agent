@@ -69,7 +69,7 @@ allowed-tools: Read, Glob, Bash
 - ingest: 8 | update: 4 | curator: 0 | lint: 1
 
 ### Tags frecuentes
-hermes-agent, jarvis, tryvex, gsap, skills, memory
+hermes-agent, jarvis, my-saas, gsap, skills, memory
 
 ### Goals activos
 🎯 goal-001: "Jarvis 85% autonomous — 55 días restantes"
@@ -83,7 +83,7 @@ hermes-agent, jarvis, tryvex, gsap, skills, memory
 ```
 📊 **Insights (30d):** 12 sesiones | 8 nodos
 🔝 Áreas: jarvis (6) > ops (4) > dev (2)
-🏷️  Tags top: hermes-agent, jarvis, tryvex
+🏷️  Tags top: hermes-agent, jarvis, my-saas
 📈 Goal-001: Jarvis 63% → 85% | 55d restantes
 ```
 

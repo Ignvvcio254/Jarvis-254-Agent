@@ -121,7 +121,7 @@ El conocimiento persiste. El mismo error NUNCA ocurre dos veces.
 - Testing end-to-end del sistema completo
 - Validacion visual si aplica (playwright)
 - Confirmar que el problema ORIGINAL esta resuelto
-- Reportar al senor Ignacio que se construyo
+- Reportar al usuario que se construyo
 
 ---
 

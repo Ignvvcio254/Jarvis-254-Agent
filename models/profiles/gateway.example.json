@@ -1,0 +1,116 @@
+{
+  "_doc": "Gateway local (models/modelo-proxy.mjs). NUNCA ponga llaves aquí: 'env:NOMBRE' lee una variable de entorno. Modelos en el selector: 'proveedor/modelo' o 'auto/<cadena>' (con respaldo automático).",
+  "providers": {
+    "nim": {
+      "kind": "openai",
+      "base": "env:NVIDIA_BASE_URL",
+      "key": "env:NVIDIA_API_KEY",
+      "maxOut": 16384,
+      "maxTools": 128
+    },
+    "gem": {
+      "kind": "openai",
+      "base": "https://generativelanguage.googleapis.com/v1beta/openai",
+      "key": "env:GEMINI_API_KEY",
+      "maxOut": 8192,
+      "maxTools": 128,
+      "extraToolCall": {
+        "extra_content": {
+          "google": {
+            "thought_signature": "skip_thought_signature_validator"
+          }
+        }
+      }
+    },
+    "or": {
+      "kind": "anthropic",
+      "base": "https://openrouter.ai/api",
+      "key": "env:OPENROUTER_API_KEY",
+      "auth": "bearer",
+      "maxTools": 256,
+      "maxOut": 8192,
+      "cuota_tokens_dia": 600000
+    },
+    "zai": {
+      "kind": "anthropic",
+      "base": "https://api.z.ai/api/anthropic",
+      "key": "env:ZAI_API_KEY",
+      "auth": "x-api-key",
+      "maxTools": 256
+    },
+    "oll": {
+      "kind": "openai",
+      "base": "http://127.0.0.1:11434/v1",
+      "key": null,
+      "maxOut": 4096,
+      "maxTools": 64
+    },
+    "kilo": {
+      "kind": "openai",
+      "base": "https://api.kilo.ai/api/gateway",
+      "key": null,
+      "maxOut": 8192,
+      "maxTools": 128,
+      "cuota_peticiones_hora": 180
+    },
+    "xai": {
+      "kind": "openai",
+      "base": "https://api.x.ai/v1",
+      "key": "env:XAI_API_KEY",
+      "maxOut": 8192,
+      "maxTools": 128,
+      "cuota_tokens_dia": 400000
+    },
+    "groq": {
+      "kind": "openai",
+      "maxTools": 128,
+      "base": "https://api.groq.com/openai/v1",
+      "key": "env:GROQ_API_KEY",
+      "maxOut": 8192,
+      "cuota_peticiones_hora": 60,
+      "cuota_tokens_dia": 180000
+    },
+    "mistral": {
+      "kind": "openai",
+      "maxTools": 128,
+      "base": "https://api.mistral.ai/v1",
+      "key": "env:MISTRAL_API_KEY",
+      "maxOut": 8192,
+      "cuota_peticiones_hora": 3000
+    },
+    "cerebras": {
+      "kind": "openai",
+      "maxTools": 128,
+      "base": "https://api.cerebras.ai/v1",
+      "key": "env:CEREBRAS_API_KEY",
+      "maxOut": 8192,
+      "cuota_peticiones_hora": 240,
+      "cuota_tokens_dia": 900000
+    }
+  },
+  "combos": {
+    "auto/barato": [
+      "nim/nvidia/nemotron-3-super-120b-a12b",
+      "nim/openai/gpt-oss-20b",
+      "gem/gemini-3.5-flash-lite",
+      "kilo/nvidia/nemotron-3-super-120b-a12b:free"
+    ],
+    "auto/potente": [
+      "nim/nvidia/nemotron-3-ultra-550b-a55b",
+      "nim/google/gemma-4-31b-it",
+      "nim/openai/gpt-oss-20b",
+      "gem/gemini-3.8-flash",
+      "nim/z-ai/glm-5.3"
+    ],
+    "auto/codigo": [
+      "nim/openai/gpt-oss-20b",
+      "nim/nvidia/nemotron-3-ultra-550b-a55b",
+      "nim/google/gemma-4-31b-it",
+      "kilo/cohere/north-mini-code:free",
+      "nim/z-ai/glm-5.3"
+    ]
+  },
+  "cooldown_s": 60,
+  "ttfb_s": 30,
+  "ttfb_ultimo_s": 120
+}

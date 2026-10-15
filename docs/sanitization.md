@@ -6,7 +6,7 @@ Este documento deja trazabilidad de qué se importó, qué se excluyó y por qu�
 
 ## Alcance revisado
 
-Fuentes evaluadas desde `C:\Users\w10\.claude`:
+Fuentes evaluadas desde `~/.claude`:
 
 - `commands/`
 - `skills/`

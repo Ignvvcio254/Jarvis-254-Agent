@@ -227,6 +227,23 @@ Use this workflow when the task:
 
 ---
 
+## 🧬 OPERATING CORE — harness (see docs/harness.md)
+
+| Layer | Skill | Invoke when |
+|---|---|---|
+| Objective verdict | `verify-repair` | Before reporting ANY code/fix/build: `verify-gate.ps1` must exit 0 |
+| Token economy | `token-router` | Before executing or delegating: minimum sufficient model |
+| Working memory | `scratchpad` | Multi-phase tasks, user corrections, session close |
+| Isolation | `subagent-orchestration` | Massively parallel / long / adversarial work |
+| Cheap-model quality | `agent-uplift` | Delegating to cheaper or non-Claude models |
+| Other CLIs | `multi-cli` | Dispatching to Antigravity/OpenCode/Codex terminals |
+| Long features | `long-run-harness` | Work that spans several sessions |
+| Self-improvement | `jarvis-evolve` | Session close, same error twice, or "improve yourself" |
+
+**Skill teaches · Hook enforces · Subagent isolates.** The verdict is objective (exit code / test / grep / screenshot), never a claim.
+
+---
+
 ## 🗜️ CAVEMAN — Progressive compression modes
 
 Skill installed in `~/.claude/skills/caveman/`. Activate only with {{YOUR_NAME}}'s approval.
@@ -246,5 +263,5 @@ When compressing context in any Caveman mode, NEVER touch:
 
 ---
 
-*Jarvis v2.1 — Open source distribution: jarvis254agent*
+*Jarvis v2.1 — Open source distribution: Jarvis-254-Agent*
 *Original system by {{YOUR_NAME}} — customize placeholders before use*

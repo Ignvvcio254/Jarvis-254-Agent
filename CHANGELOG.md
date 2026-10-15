@@ -6,6 +6,19 @@ Versionado con [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-10-14
+
+### Added
+- `install.py`: idempotent installer; merges hooks into `settings.json` with backup, never overwrites user config or profiles.
+- Harness core skills: `verify-repair` (+ `verify-gate.ps1`), `token-router`, `scratchpad`, `agent-uplift`, `multi-cli`, `subagent-orchestration`, `long-run-harness`, `jarvis-evolve`.
+- Autopilot hooks in `hooks/`: session boot, archetype router, correction detector, destructive guard, pre-compact checkpoint, verdict guard, token ledger, harness guard.
+- 9 subagents in `agents/`.
+- Multi-model gateway in `models/`: any provider in Claude Code's `/model`, Anthropic⇄OpenAI translation, `auto/*` fallback chains, quotas, loopback + token security. Docs in `docs/models.md`.
+- Tests: installer merge/idempotency, destructive guard, gateway (37 node tests), hard-coded user-path guard. CI runs node tests.
+
+### Fixed
+- Removed author-specific paths, names and project references from commands, skills and templates.
+
 ## [0.1.0] — 2026-05-06
 
 ### Added
