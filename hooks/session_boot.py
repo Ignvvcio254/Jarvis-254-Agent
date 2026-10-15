@@ -50,7 +50,7 @@ def main():
         except Exception:
             ckpt = None
     if ckpt:
-        parts.append("## Lo que había antes de compactar (la compactación pierde detalle: úsalo para no perder el hilo)\n" + ckpt)
+        parts.append("## State before the last compaction (compaction loses detail: use this to keep the thread)\n" + ckpt)
 
     # 1. Scratchpad de tarea activa (trabajo en curso) — scratchpad_resume
     scratch = root / ".scratch" / "task.md"
@@ -59,20 +59,20 @@ def main():
             txt = scratch.read_text(encoding="utf-8").strip()
             if txt:
                 if len(txt) > MAX_SCRATCH_CHARS:
-                    txt = txt[:MAX_SCRATCH_CHARS] + "\n... (truncado; lee .scratch/task.md completo si necesitas más)"
-                parts.append("## Trabajo en curso (scratchpad de este proyecto)\n" + txt)
+                    txt = txt[:MAX_SCRATCH_CHARS] + "\n... (truncated; read the full .scratch/task.md if you need more)"
+                parts.append("## Work in progress (this project's scratchpad)\n" + txt)
         except Exception:
             pass
 
     # 2. Recordatorio del protocolo del harness (siempre, breve)
     parts.append(
-        "## Protocolo harness activo\n"
-        "- Antes de reportar entregas de código: corre verify-gate (veredicto objetivo). "
-        "El Stop hook verdict_guard lo recuerda.\n"
-        "- Antes de ejecutar/delegar: token-router (modelo mínimo por dificultad).\n"
-        "- Al cerrar trabajo significativo: propaga a memoria (scratchpad → 5 capas).\n"
-        "- Skills núcleo: verify-repair · token-router · scratchpad · agent-uplift · "
-        "multi-cli · subagent-orchestration."
+        "## Active harness protocol\n"
+        "- Before reporting code as done: run the verify gate (objective verdict). "
+        "The verdict_guard Stop hook enforces it.\n"
+        "- Before executing/delegating: token-router (minimum model by difficulty).\n"
+        "- When closing significant work: propagate to memory (scratchpad skill).\n" "- Before claiming done/deployed, or on a works-but-doesn't symptom: field-lessons.\n"
+        "- Core skills: verify-repair · token-router · scratchpad · agent-uplift · "
+        "multi-cli · subagent-orchestration · long-run-harness."
     )
 
     # Solo emitir si hay scratchpad (trabajo en curso); el protocolo solo no
@@ -81,7 +81,7 @@ def main():
         sys.exit(0)
 
     context = (
-        "[session-boot] Estado recuperado automáticamente al arrancar:\n\n"
+        "[session-boot] State restored automatically at startup:\n\n"
         + "\n\n".join(parts)
     )
     print(json.dumps({

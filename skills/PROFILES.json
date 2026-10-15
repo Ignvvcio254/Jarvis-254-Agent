@@ -1,5 +1,5 @@
 {
-  "_doc": "Skill profiles for install.py --skills. Every installed skill's description is loaded into the agent's context each session (all 1400+ \u2248 57k tokens), so install lean and add packs when a task needs them.",
+  "_doc": "Skill profiles for install.py --skills. Every installed skill's description is loaded into the agent's context each session (all 1400+ ≈ 57k tokens), so install lean and add packs when a task needs them.",
   "core": [
     "verify-repair",
     "token-router",
@@ -11,8 +11,7 @@
     "jarvis-evolve",
     "field-lessons",
     "prp",
-    "bucle-agentico",
-    "claude-brain"
+    "bucle-agentico"
   ],
   "dev": [
     "tdd-workflow",

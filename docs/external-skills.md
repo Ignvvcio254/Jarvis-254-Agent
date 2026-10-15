@@ -18,6 +18,7 @@ npx skills update -g                              # keep them current
 | `heygen-com/hyperframes` | HTML-to-video: motion graphics, captions, product-launch and PR-to-video | Content / video work |
 | `stablyai/orca` | Orca orchestration, computer use, emulators, Linear | SWARM / multi-agent |
 | `intellectronica/agent-skills` | Notion API | Docs / knowledge bases |
+| [`AgustinGoniDev/claude-brain-skill`](https://github.com/AgustinGoniDev/claude-brain-skill) | Installer for a per-project LLM wiki (`/brain ingest \| query \| lint`). The global wiki in `cerebro/` works without it. — `git clone https://github.com/AgustinGoniDev/claude-brain-skill ~/.claude/skills/claude-brain` | Memory |
 | [`JuliusBrussee/caveman`](https://github.com/JuliusBrussee/caveman) | Progressive output compression (used by the CAVEMAN section of `CLAUDE.md`) — `git clone https://github.com/JuliusBrussee/caveman ~/.claude/skills/caveman` | Token economy |
 
 Rule of thumb: install a package when a task needs it, not all at once — every skill's description is loaded

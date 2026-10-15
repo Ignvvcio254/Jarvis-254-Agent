@@ -1,79 +1,83 @@
 ---
 name: long-run-harness
-description: Método para trabajos LARGOS que cruzan varias sesiones (un módulo del CRM, una migración, una feature grande): sesión inicializadora que crea una lista de funcionalidades con banderas de aprobado, archivo de progreso y script de arranque; luego cada sesión retoma, hace UNA funcionalidad, la verifica con evidencia y deja commit. Úsalo cuando el trabajo no cabe en una sesión o cuando ya se declaró "terminado" algo que no lo estaba. Complementa a prp y bucle-agentico; no los reemplaza.
+description: Method for LONG work that spans several sessions (a module, a migration, a big feature): an initialiser session creates a feature list with pass flags, a progress file and a bootstrap script; every later session resumes, does ONE feature, verifies it with evidence and commits. Use when the work doesn't fit in one session or when something was declared "done" that wasn't. Complements prp and bucle-agentico; doesn't replace them.
 ---
 
-# Long-run harness — continuidad sin autoengaño
+# Long-run harness — continuity without self-deception
 
-Basado en el patrón publicado por Anthropic para agentes de larga duración (agente inicializador + agente de código con
-lista de funcionalidades, archivo de progreso y commits por funcionalidad), implementado con mis propias piezas:
-`verify-repair` (veredicto), `scratchpad` (memoria de trabajo), `token-router` (modelo por dificultad) y un validador que
-**impone** las reglas (`harness_guard.mjs`): la skill enseña, el hook impone.
+Based on the pattern Anthropic published for long-running agents (initialiser agent + coding agent with a
+feature list, a progress file and per-feature commits), built from the harness's own pieces: `verify-repair`
+(verdict), `scratchpad` (working memory), `token-router` (model by difficulty) and a validator that **enforces**
+the rules (`harness_guard.mjs`): the skill teaches, the hook enforces.
 
-## Cuándo usarlo y cuándo NO
-- **Sí:** el trabajo abarca varias sesiones, tiene muchas piezas verificables, o el historial muestra "terminé" prematuros.
-- **No:** un fix o una feature de una sesión (usa `bucle-agentico`), ni la planificación inicial de una feature (usa `prp`: el PRP
-  puede ALIMENTAR la lista de funcionalidades de este harness).
+## When to use it and when NOT
+- **Yes:** the work spans several sessions, has many verifiable pieces, or the history shows premature "done"s.
+- **No:** a one-session fix or feature (use `bucle-agentico`), or the initial planning of a feature (use `prp`:
+  the PRP can FEED this harness's feature list).
 
-## Archivos (en el repo del proyecto, carpeta `.harness/`)
-| Archivo | Qué es | Quién lo cambia |
+## Files (in the project repo, folder `.harness/`)
+| File | What it is | Who changes it |
 |---|---|---|
-| `feature_list.json` | Lista de funcionalidades. Cada una: `id`, `descripcion`, `pasos[]`, `pasa` (false al inicio), `evidencia`, `nota` | Solo `pasa`, `evidencia` y `nota` cambian. Jamás se borra, reordena ni se editan `descripcion`/`pasos` |
-| `progress.md` | Bitácora: qué se hizo, por qué, qué sigue, bloqueos | Se agrega al final en cada sesión |
-| `init.ps1` (o `.sh`) | Levanta el entorno y corre un humo mínimo (build, servidor, un test de ida y vuelta) | Se crea una vez y se mantiene |
+| `feature_list.json` | Feature list. Each: `id`, `descripcion`, `pasos[]`, `pasa` (false at first), `evidencia`, `nota` | Only `pasa`, `evidencia` and `nota` change. Never delete, reorder, or edit `descripcion`/`pasos` |
+| `progress.md` | Log: what was done, why, what's next, blockers | Appended every session |
+| `init.ps1` (or `.sh`) | Brings up the environment and runs a minimal smoke test (build, server, one round-trip test) | Created once and maintained |
 
-Ejemplo de funcionalidad:
+(Field names are Spanish for compatibility with `harness_guard.mjs`, which also accepts a `features` key.)
+
+Feature example:
 ```json
-{ "id": "leads-filtro-estado", "descripcion": "Filtrar leads por estado y recordar el filtro en la URL",
-  "pasos": ["abrir /leads", "elegir estado 'contactado'", "la tabla muestra solo contactados", "recargar: el filtro persiste"],
+{ "id": "leads-status-filter", "descripcion": "Filter leads by status and remember the filter in the URL",
+  "pasos": ["open /leads", "choose status 'contacted'", "the table shows only contacted", "reload: the filter persists"],
   "pasa": false }
 ```
 
-## Sesión 1 — inicializadora (no se escribe código de producto)
-1. Entender el objetivo y las restricciones del proyecto (CLAUDE.md, reglas, patrones obligatorios).
-2. Redactar `feature_list.json` **exhaustiva y granular**: cada funcionalidad verificable de punta a punta por una persona usando la app.
-   Mejor 60 funcionalidades pequeñas que 8 vagas. Todas `pasa:false`.
-3. Crear `init.ps1` y comprobar que corre limpio desde cero.
-4. Crear `progress.md` con el contexto y el orden de ataque recomendado (por dependencias).
-5. Commit en una **rama de trabajo** (nunca `main`): `chore(harness): lista de funcionalidades inicial`.
-6. Validar: `node ~/.claude/scripts/harness_guard.mjs` → debe decir OK.
+## Session 1 — initialiser (no product code is written)
+1. Understand the goal and the project's constraints (CLAUDE.md, rules, mandatory patterns).
+2. Write an **exhaustive, granular** `feature_list.json`: each feature verifiable end to end by a person using
+   the app. Better 60 small features than 8 vague ones. All `pasa:false`.
+3. Create `init.ps1`/`init.sh` and check it runs cleanly from scratch.
+4. Create `progress.md` with the context and the recommended order of attack (by dependencies).
+5. Commit on a **work branch** (never `main`): `chore(harness): initial feature list`.
+6. Validate: `node ~/.claude/scripts/harness_guard.mjs` → must say OK.
 
-## Sesiones siguientes — una funcionalidad por turno de trabajo
-1. **Orientarse:** leer `progress.md`, `git log --oneline -15` y `feature_list.json`.
-2. **Humo:** correr `init.ps1`. Si el estado base está roto, **arreglar eso primero** y registrarlo; no apilar trabajo sobre un cimiento roto.
-3. **Elegir UNA** funcionalidad `pasa:false` (respetando dependencias). Una. No dos "ya que estamos".
-4. Implementar. Modelo por dificultad con `token-router`; delegar lo mecánico a `worker-low`.
-5. **Verificar de punta a punta como lo haría una persona** (navegador/curl/test real, no solo "compila"). Usar `verify-repair`.
-6. Solo con la verificación pasando, marcar `pasa:true` y escribir `evidencia`: el comando o chequeo **y su resultado**
-   (ej. `playwright leads-filtro.spec → 4/4 pasos OK`). Sin evidencia el validador la rechaza.
-7. Agregar a `progress.md`: qué hice, qué decidí y por qué, qué sigue, qué quedó bloqueado.
-8. `node ~/.claude/scripts/harness_guard.mjs` → OK, y **commit** (`feat(<id>): …`). Parar o seguir con la siguiente.
+## Following sessions — one feature per work turn
+1. **Orient:** read `progress.md`, `git log --oneline -15` and `feature_list.json`.
+2. **Smoke:** run `init`. If the baseline is broken, **fix that first** and log it; don't stack work on a broken
+   foundation.
+3. **Pick ONE** `pasa:false` feature (respecting dependencies). One. Not two "while we're at it".
+4. Implement. Model by difficulty with `token-router`; delegate the mechanical parts to `worker-low`.
+5. **Verify end to end as a person would** (browser/curl/real test, not just "it compiles"). Use `verify-repair`.
+6. Only with verification passing, set `pasa:true` and write `evidencia`: the command or check **and its result**
+   (e.g. `playwright leads-filter.spec → 4/4 steps OK`). Without evidence the validator rejects it.
+7. Append to `progress.md`: what I did, what I decided and why, what's next, what's blocked.
+8. `node ~/.claude/scripts/harness_guard.mjs` → OK, then **commit** (`feat(<id>): …`). Stop or continue.
 
-## Reglas que no se negocian
-- **No se declara terminado por decreto.** El estado del proyecto es el de `feature_list.json`, no mi impresión.
-- **No se baja la vara:** prohibido editar `descripcion` o `pasos` para que algo "pase"; prohibido borrar funcionalidades difíciles.
-  Si una ya no aplica, se deja con `nota` explicando por qué.
-- **No se toca el test para que pase.** Se corrige el código.
-- **Una funcionalidad por vez**, y siempre se deja el repositorio en un estado que arranca (`init.ps1` verde) al terminar la sesión.
-- **Regresión:** si algo aprobado deja de funcionar, vuelve a `pasa:false` con `nota` y se arregla antes de seguir.
-- Nunca `push` a `main`; todo en rama y PR (un PR por cambio).
-- Aviso al usuario al cerrar: cuántas funcionalidades pasan (`n/total`), cuál sigue y qué bloquea.
+## Non-negotiable rules
+- **Nothing is done by decree.** The project's state is `feature_list.json`, not my impression.
+- **Don't lower the bar:** never edit `descripcion` or `pasos` to make something "pass"; never delete hard
+  features. If one no longer applies, leave it with a `nota` explaining why.
+- **Don't touch the test to make it pass.** Fix the code.
+- **One feature at a time**, and always leave the repo in a state that boots (`init` green) at session end.
+- **Regression:** if something approved stops working, it goes back to `pasa:false` with a `nota` and is fixed
+  before moving on.
+- Never push to `main`; everything on a branch and PR (one PR per change).
+- Tell the user at close: how many features pass (`n/total`), which is next and what blocks.
 
-## Anti-patrones (los que este harness existe para evitar)
-- Marcar `pasa:true` tras "se ve bien" sin ejecutar el flujo real.
-- Hacer varias funcionalidades de golpe y no poder decir cuál rompió qué.
-- Dejar la sesión con el entorno roto "para arreglarlo después".
-- Reescribir `progress.md` en lugar de agregar: se pierde el hilo.
+## Anti-patterns this harness exists to prevent
+- Marking `pasa:true` after "looks good" without running the real flow.
+- Doing several features at once and not knowing which broke what.
+- Leaving the session with the environment broken "to fix later".
+- Rewriting `progress.md` instead of appending: the thread is lost.
 
-## Integración con el resto
-- **prp:** el PRP define fases y contexto; sus criterios de aceptación se vuelven funcionalidades de la lista.
-- **bucle-agentico:** sigue siendo el motor de una sesión; este harness aporta la memoria entre sesiones.
-- **scratchpad / precompact:** el estado vivo de la sesión va al scratchpad; el hook PreCompact conserva el hilo si se compacta.
-- **subagent-orchestration:** una funcionalidad grande puede repartirse, pero **la bandera `pasa` solo la cambia quien verificó**.
-- **jarvis-eval:** si una regla de este método se rompe repetidamente, se agrega una tarea al banco para medirla.
+## Integration
+- **prp:** the PRP defines phases and context; its acceptance criteria become features in the list.
+- **bucle-agentico:** still the engine of one session; this harness adds memory across sessions.
+- **scratchpad / precompact:** live session state goes to the scratchpad; the PreCompact hook keeps the thread.
+- **subagent-orchestration:** a big feature can be split, but **only whoever verified flips `pasa`**.
+- **evals:** if a rule of this method keeps breaking, add a task to the behaviour bench to measure it.
 
-## Comandos útiles
+## Commands
 ```
-node ~/.claude/scripts/harness_guard.mjs            # valida la lista contra git (HEAD)
-node ~/.claude/scripts/harness_guard.mjs --base main  # contra otra rama
+node ~/.claude/scripts/harness_guard.mjs              # validate the list against git (HEAD)
+node ~/.claude/scripts/harness_guard.mjs --base main  # against another branch
 ```

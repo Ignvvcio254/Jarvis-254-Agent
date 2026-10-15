@@ -1,104 +1,102 @@
 ---
 name: subagent-orchestration
-description: Orquestar subagentes (Agent/Task) con context firewall, patrón fan-out→synthesize y grader por rúbrica (Performance Outcomes). Usar cuando una tarea es masivamente paralela, larga, o se beneficia de context windows aislados — investigación multi-fuente, refactor multi-archivo, revisión multi-perspectiva, benchmark de N combinaciones. Complementa multi-cli (CLIs externos) con subagentes Claude internos.
+description: Orchestrate subagents (Agent/Task) with a context firewall, the fan-out→synthesize pattern and a rubric grader (Performance Outcomes). Use when a task is massively parallel, long, or benefits from isolated context windows — multi-source research, multi-file refactors, multi-perspective review, benchmarking N combinations. Complements multi-cli (external CLIs) with internal Claude subagents.
 ---
 
-# subagent-orchestration — Paralelismo con aislamiento y grader
+# subagent-orchestration — Parallelism with isolation and a grader
 
-> Harness Jarvis-UPLIFT (extensión frontier). Porta los patrones de Anthropic
-> Dynamic Workflows + Performance Outcomes (jun 2026, +10pts en benchmarks duros)
-> y el "context firewall" de subagentes (Claude Code 2026).
+> Jarvis harness (frontier extension). Ports Anthropic's dynamic-workflow and Performance Outcomes patterns
+> and the subagent "context firewall".
 
-## La doctrina de 4 capas (comunidad, validada)
+## The 4-layer doctrine
 
-| Capa | Componente | Rol | Cuándo |
+| Layer | Component | Role | When |
 |---|---|---|---|
-| 1 | CLAUDE.md | reglas/memoria | siempre |
-| 2 | Skills | procedimiento reutilizable inline | tarea repetible en el mismo contexto |
-| 3 | Hooks | enforcement determinista | regla que SIEMPRE debe dispararse |
-| 4 | **Subagentes** | aislamiento + paralelo | trabajo que ensuciaría el contexto principal |
+| 1 | CLAUDE.md | rules/memory | always |
+| 2 | Skills | reusable inline procedure | repeatable task in the same context |
+| 3 | Hooks | deterministic enforcement | a rule that must ALWAYS fire |
+| 4 | **Subagents** | isolation + parallelism | work that would pollute the main context |
 
-Regla de decisión: **"Skill enseña · Hook impone · Subagente aísla"**. Se combinan.
+Decision rule: **"Skill teaches · Hook enforces · Subagent isolates"**. They combine.
 
-## Cuándo usar un subagente (no inline)
+## When to use a subagent (not inline)
 
-Usar `Agent`/`Task` cuando:
-- La tarea generaría ruido que no volverás a mirar (búsquedas, logs, lecturas masivas) → **context firewall**: el principal solo ve el resumen.
-- Es masivamente paralela (N fuentes, N archivos, N combinaciones).
-- Cada paso se beneficia de un context window limpio (no cross-contaminación).
-- Es adversarial (generar vs verificar deben estar separados — ver grader).
+Use `Agent`/`Task` when:
+- The task would generate noise you won't look at again (searches, logs, mass reads) → **context firewall**:
+  the main agent only sees the summary.
+- It is massively parallel (N sources, N files, N combinations).
+- Each step benefits from a clean context window (no cross-contamination).
+- It is adversarial (generating vs verifying must be separate — see grader).
 
-NO usar subagente para: ediciones pequeñas, tareas de 1 archivo, cosas donde el costo de coordinar > el de hacerlo inline. (3-5 subagentes concurrentes es el punto óptimo; más, gastas más mergeando que ahorrando.)
+Do NOT use a subagent for small edits, single-file tasks, or anything where coordination costs more than doing
+it inline. 3-5 concurrent subagents is the sweet spot; beyond that you spend more merging than you save.
 
-## Patrón 1 — Fan-out → Synthesize
-
-Para tareas con muchos sub-pasos independientes:
-
-```
-LEAD (Opus/Jarvis)
-  ├─ fan-out: N subagentes Explore (Haiku, baratos) en paralelo
-  │    cada uno: una fuente / un módulo / una hipótesis · context window propio
-  ├─ barrera: esperar a TODOS
-  └─ synthesize: 1 subagente (Opus) o Jarvis fusiona los resúmenes estructurados
-```
-
-Routing de modelo ([[token-router]]): explorar = Haiku/gemma (barato, paralelo);
-sintetizar = Opus (donde se justifica el razonamiento). Ahorro real: el grueso del
-trabajo corre en el tier barato; solo la síntesis usa el caro.
-
-Ejemplo: investigación multi-fuente, mapeo de codebase grande, refactor de N archivos
-independientes, benchmark de N modelos×prompts.
-
-## Patrón 2 — Grader por rúbrica (Performance Outcomes)
-
-El verify-repair objetivo (exit code) cubre tareas binarias. Para tareas con calidad
-graduable, añadir un **grader separado**:
+## Pattern 1 — Fan-out → Synthesize
 
 ```
-GENERADOR (subagente A) → produce el entregable
+LEAD (strong model)
+  ├─ fan-out: N cheap Explore subagents in parallel
+  │    each: one source / one module / one hypothesis · its own context window
+  ├─ barrier: wait for ALL
+  └─ synthesize: one strong subagent (or the lead) merges the structured summaries
+```
+
+Model routing ([[token-router]]): explore = cheap (Haiku/free, parallel); synthesize = strong (where reasoning
+pays off). Real savings: the bulk of the work runs on the cheap tier.
+
+Examples: multi-source research, mapping a large codebase, refactoring N independent files, benchmarking N
+models × prompts.
+
+## Pattern 2 — Rubric grader (Performance Outcomes)
+
+The objective verify-repair gate (exit code) covers binary tasks. For gradable quality add a **separate grader**:
+
+```
+GENERATOR (subagent A) → produces the deliverable
         ↓
-GRADER (subagente B, distinto) → evalúa contra una RÚBRICA explícita
+GRADER (subagent B, different) → scores it against an explicit RUBRIC
         ↓
-  ¿cumple? → aceptar
-  ¿no?     → devolver al generador con el gap específico → revisar (máx N)
+  passes? → accept
+  no?     → back to the generator with the specific gap → revise (max N)
 ```
 
-Reglas:
-- El grader es un subagente DISTINTO del generador (MAR: el mismo se estanca).
-- La rúbrica es explícita y se escribe ANTES: ej. "todos los tests pasan · sin TODOs
-  nuevos · sin cambios de API pública · cobertura ≥ 80%".
-- Donde se pueda, la rúbrica se ancla en señal objetiva ([[verify-repair]]
-  `verify-gate.ps1`): el grader corre el gate y lee el verdict, no opina.
-- Esto es lo que Anthropic llama Performance Outcomes (+10pts en sus benchmarks duros).
+Rules:
+- The grader is a DIFFERENT subagent from the generator (MAR: the same one gets stuck).
+- The rubric is explicit and written FIRST: e.g. "all tests pass · no new TODOs · no public API changes ·
+  coverage ≥ 80%".
+- Wherever possible the rubric is anchored on an objective signal ([[verify-repair]]): the grader runs the gate
+  and reads the verdict, it doesn't opine.
 
-## Patrón 3 — SubagentStop gate
+## Pattern 3 — SubagentStop gate
 
-Cuando un subagente termina, su salida NO se acepta sin pasar el gate:
-- Si la tarea fue de código → correr `verify-gate.ps1` sobre su output (exit 0 obligatorio).
-- Si falla → re-despachar al subagente con el gap (additionalContext), no aceptar el resumen.
-- Es el equivalente subagente del check `edited`+verdict de multi-cli.
+When a subagent finishes, its output is NOT accepted without passing the gate:
+- Code task → run the verify gate on its output (exit 0 mandatory).
+- Failure → re-dispatch the subagent with the gap; don't accept the summary.
+- It is the subagent equivalent of multi-cli's `edited` + verdict check.
 
-## Integración con el harness
+## Harness integration
 
-| Skill | Rol en la orquestación |
+| Skill | Role in orchestration |
 |---|---|
-| [[token-router]] | Haiku para fan-out, Opus para synthesize — el ahorro |
-| [[verify-repair]] | señal objetiva del grader y del SubagentStop gate |
-| `agent-uplift` SPEC-COMPILER | cada subagente recibe una spec one-shot compilada |
-| [[scratchpad]] | registra qué subagente hizo qué + correcciones |
-| `multi-cli` | hermano externo: CLIs (AGY/OpenCode) en vez de subagentes Claude. Elegir según: subagente=contexto Claude aislado · multi-cli=modelos de otros proveedores en terminales visibles |
+| [[token-router]] | cheap model for fan-out, strong for synthesis — the savings |
+| [[verify-repair]] | objective signal for the grader and the SubagentStop gate |
+| `agent-uplift` spec compiler | each subagent gets a compiled one-shot spec |
+| [[scratchpad]] | records which subagent did what + corrections |
+| `multi-cli` | external sibling: other providers' CLIs in visible terminals instead of Claude subagents |
 
-## Subagente vs multi-cli (cuándo cada uno)
+## Subagent vs multi-cli
 
-- **Subagente** (`Agent`/`Task`): trabajo Claude que necesita context firewall, dentro de la sesión. El lead ve solo el resumen.
-- **multi-cli** (AGY/OpenCode): delegar a modelos de OTROS proveedores en terminales visibles que el usuario supervisa, resiliencia multi-proveedor.
+- **Subagent** (`Agent`/`Task`): Claude work that needs a context firewall, inside the session. The lead only
+  sees the summary.
+- **multi-cli**: delegate to OTHER providers' models in visible terminals the user supervises; multi-provider
+  resilience.
 
-## Verificación de este skill
+## Verifying this skill
 
-- Una tarea de investigación: 3 subagentes Explore en paralelo + 1 synthesize → reporte citado.
-- Una tarea de código con grader: generador + grader separado corriendo verify-gate.
+- A research task: 3 parallel Explore subagents + 1 synthesis → a cited report.
+- A code task with a grader: generator + separate grader running the verify gate.
 
-## Anti-patrón
+## Anti-pattern
 
-Spawnar >5 subagentes para todo "por paralelizar": el costo de mergear resúmenes supera
-el ahorro. Fan-out masivo solo cuando la tarea genuinamente se abre (N fuentes/archivos).
+Spawning >5 subagents for everything "to parallelise": merging summaries costs more than it saves. Massive
+fan-out only when the task genuinely opens up (N sources/files).
