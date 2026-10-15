@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-// JARVIS EVAL — me mide a mí mismo con pruebas objetivas de mis propias reglas.
+// JARVIS EVAL — measures the agent with objective tests of its own rules.
 //
-//   node jarvis-eval.mjs --selftest            valida los calificadores SIN llamar a ningún modelo
-//   node jarvis-eval.mjs --list                lista las tareas
+//   node jarvis-eval.mjs --selftest            checks the graders WITHOUT calling any model
+//   node jarvis-eval.mjs --list                lists the tasks
 //   node jarvis-eval.mjs [--model sonnet] [--only a,b] [--gateway] [--timeout 150]
-//   node jarvis-eval.mjs --report              compara las dos últimas corridas y marca regresiones
+//   node jarvis-eval.mjs --report              compares the last two runs and flags regressions
 //
-// Cada tarea corre en un directorio temporal propio, con `claude -p` (stream-json para ver las herramientas
-// que usó). Se cargan los hooks y el CLAUDE.md reales (es MI harness el que se mide) pero ningún MCP
-// (--strict-mcp-config vacío): ahorra memoria y evita efectos externos. --gateway usa claude-multi.ps1,
-// lo que permite comparar OTROS modelos (nim/…, gem/…) con exactamente las mismas tareas.
-// Costo: cada corrida de una tarea es una sesión completa; usar con moderación y en una máquina con memoria libre.
+// Each task runs in its own temp directory with `claude -p` (stream-json, to see which tools were used).
+// Your real hooks and CLAUDE.md load (it is YOUR harness being measured) but no MCP servers
+// (empty --strict-mcp-config): saves memory and avoids external effects. --gateway uses the multi-model
+// launcher, so OTHER models (nim/…, gem/…) can be compared on exactly the same tasks.
+// Cost: each task is a full session; use sparingly.
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -48,11 +48,11 @@ function selftest() {
         const r = t.grade({ ...ctx, dir: d });
         const ok = r.pass === bien;
         if (!ok) fallos++;
-        console.log(`${ok ? "OK  " : "FALLA"} ${t.id.padEnd(30)} caso ${bien ? "bueno" : "malo "} → pass=${r.pass} (${r.detalle})`);
+        console.log(`${ok ? "OK  " : "FAIL "} ${t.id.padEnd(30)} case ${bien ? "good" : "bad "} → pass=${r.pass} (${r.detalle})`);
       } finally { if (path.basename(d).startsWith("jeval-st-")) fs.rmSync(d, { recursive: true, force: true }); }
     }
   }
-  console.log(fallos ? `\n${fallos} calificador(es) mal calibrado(s)` : "\nTodos los calificadores distinguen bien el caso bueno del malo.");
+  console.log(fallos ? `\n${fallos} grader(s) badly calibrated` : "\nEvery grader tells the good case from the bad one.");
   process.exit(fallos ? 1 : 0);
 }
 
@@ -92,7 +92,7 @@ async function ejecutar() {
   fs.mkdirSync(path.dirname(HIST), { recursive: true });
   const corrida = new Date().toISOString();
   let pasan = 0;
-  console.log(`Corrida ${corrida} · modelo=${modelo}${gateway ? " (vía gateway)" : ""} · ${tareas.length} tareas\n`);
+  console.log(`Run ${corrida} · model=${modelo}${gateway ? " (via gateway)" : ""} · ${tareas.length} tasks\n`);
   for (const t of tareas) {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "jeval-"));
     try {
@@ -100,23 +100,23 @@ async function ejecutar() {
       const r = await correr(t, dir, modelo, gateway, timeoutS);
       const v = r.vencio ? { pass: false, detalle: `timeout ${timeoutS}s` } : t.grade({ dir, texto: r.texto, tools: r.tools });
       if (v.pass) pasan++;
-      console.log(`${v.pass ? "PASA " : "FALLA"} ${t.id.padEnd(30)} ${String(r.seg).padStart(6)}s  ${v.detalle}`);
+      console.log(`${v.pass ? "PASS " : "FAIL "} ${t.id.padEnd(30)} ${String(r.seg).padStart(6)}s  ${v.detalle}`);
       fs.appendFileSync(HIST, JSON.stringify({ corrida, modelo: modelo + (gateway ? "@gw" : ""), tarea: t.id, pass: v.pass, detalle: v.detalle, respuesta: String(r.texto ?? "").slice(0, 600), seg: r.seg, usd_equiv: r.costo, tokens_out: r.uso?.output_tokens ?? null }) + "\n");
     } finally { if (path.basename(dir).startsWith("jeval-")) fs.rmSync(dir, { recursive: true, force: true }); }
   }
-  console.log(`\n${pasan}/${tareas.length} pasan. Historial: ${HIST}`);
+  console.log(`\n${pasan}/${tareas.length} pass. History: ${HIST}`);
 }
 
 function reporte() {
-  if (!fs.existsSync(HIST)) return console.log("Sin historial todavía.");
+  if (!fs.existsSync(HIST)) return console.log("No history yet.");
   const filas = fs.readFileSync(HIST, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l));
   const grupos = {};
   for (const r of filas) (grupos[r.modelo + "|" + r.tarea] ||= []).push(r);
-  console.log("modelo · tarea".padEnd(52) + "última   anterior  veredicto");
+  console.log("model · task".padEnd(52) + "latest   previous  verdict");
   for (const [k, v] of Object.entries(grupos)) {
     const [u, a] = [v.at(-1), v.at(-2)];
-    const est = !a ? "primera medición" : u.pass === a.pass ? "estable" : u.pass ? "MEJORÓ" : "REGRESIÓN";
-    console.log(k.replace("|", " · ").padEnd(52) + (u.pass ? "pasa    " : "falla   ") + (a ? (a.pass ? "pasa      " : "falla     ") : "—         ") + est);
+    const est = !a ? "first measurement" : u.pass === a.pass ? "stable" : u.pass ? "IMPROVED" : "REGRESSION";
+    console.log(k.replace("|", " · ").padEnd(52) + (u.pass ? "pass    " : "fail    ") + (a ? (a.pass ? "pass      " : "fail      ") : "—         ") + est);
   }
 }
 

@@ -3,7 +3,7 @@
   "owner": { "name": "Jarvis-254-Agent contributors" },
   "metadata": {
     "description": "Jarvis-254-Agent: an engineering co-pilot harness for Claude Code.",
-    "version": "0.4.0"
+    "version": "0.5.0"
   },
   "plugins": [
     {

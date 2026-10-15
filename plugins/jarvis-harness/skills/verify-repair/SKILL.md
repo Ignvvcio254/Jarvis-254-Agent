@@ -1,65 +1,65 @@
 ---
 name: verify-repair
-description: Gate de veredicto OBJETIVO antes de reportar cualquier entrega. Una tarea no está hecha porque el modelo lo diga, sino porque una señal ejecutable lo confirma (exit code, test, lint, grep, screenshot). Incluye bucle repair con crítico separado del generador. Activar al cerrar cualquier tarea de código, fix, build, o entregable verificable.
+description: OBJECTIVE verdict gate before reporting any delivery. A task is not done because the model says so, but because an executable signal confirms it (exit code, test, lint, grep, screenshot). Includes a repair loop with a critic separate from the generator. Activate when closing any code task, fix, build or verifiable deliverable.
 ---
 
-# verify-repair — El veredicto no es un claim del modelo
+# verify-repair — The verdict is not a model claim
 
-> Núcleo del harness Jarvis-UPLIFT (F1). Porta el patrón anti-gaming de evolve-loop
-> (`commit-gate`) + el orden de verificación de prax-agent.
-> Doctrina: *"The verdict is not a model claim — it's an exit code. The model writes
-> prose but cannot game the predicate suite."*
+> Core of the Jarvis harness. Ports the anti-gaming pattern of evolve-loop (`commit-gate`) and the
+> verification order of prax-agent.
+> Doctrine: *"The verdict is not a model claim — it's an exit code. The model writes prose but cannot game
+> the predicate suite."*
 
-## El principio (no negociable)
+## The principle (non-negotiable)
 
-Una tarea **NO está completa porque Jarvis lo diga**. Está completa cuando una **señal
-objetiva** lo confirma. El modelo puede escribir prosa; no puede gamear el predicado.
+A task is **NOT complete because the agent says so**. It is complete when an **objective signal**
+confirms it. The model can write prose; it cannot game the predicate.
 
-Causa raíz que esto elimina: reportar éxito sin verificar (ej. caso `dayPhase` —
-se reportó "está hecho", Playwright mostró que no existía).
+Root cause this removes: reporting success without verifying (e.g. the `dayPhase` case — "it's done" was
+reported, Playwright showed the feature did not exist).
 
-## Cuándo se activa (obligatorio)
+## When it activates (mandatory)
 
-Antes de reportar como completa CUALQUIER tarea de:
-- código nuevo o editado
-- fix de bug
+Before reporting as complete ANY task of:
+- new or edited code
+- bug fix
 - build / config / infra
-- entregable de worker (AGY / OpenCode)
+- a worker's deliverable (other CLIs or subagents)
 - refactor / delete
 
-No aplica a: respuestas conversacionales, investigación pura, decisiones de diseño.
+Does not apply to: conversational answers, pure research, design decisions.
 
-## Gates equivalentes + sello (evita falsos positivos del verdict_guard)
+## Equivalent gates + stamp (avoids verdict_guard false positives)
 
-`verify-gate.ps1` escribe `.verify/verdict.json`. Pero otros gates son igual o MÁS
-fuertes y el `verdict_guard` ahora los reconoce:
-- **Auto-reconocidos por el guard** (no requieren nada): `.js/.mjs/.cjs` → `node --check`;
-  `.py` → `py_compile`. El guard los verifica solo y no avisa si pasan.
-- **Caros (TS/build/deploy)**: si verificaste con `tsc --noEmit` exit 0, `npm run build`,
-  o un deploy de Vercel READY, **séllalo** para que el guard no dé falso positivo:
-  `python ~/.claude/scripts/verdict_stamp.py <gate>` (ej. `tsc`, `vercel-build`).
-  El sello SOLO se pone tras una verificación REAL que pasó; no es para saltarse el gate.
+The gate writes `.verify/verdict.json`. Other gates are as strong or STRONGER and `verdict_guard`
+recognises them:
+- **Auto-recognised by the guard** (nothing needed): `.js/.mjs/.cjs` → `node --check`; `.py` → `py_compile`.
+  The guard checks them itself and stays quiet if they pass.
+- **Expensive ones (TS / build / deploy)**: if you verified with `tsc --noEmit` exit 0, `npm run build`, or a
+  deployment reported READY, **stamp it** so the guard doesn't fire a false positive:
+  `python ~/.claude/scripts/verdict_stamp.py <gate>` (e.g. `tsc`, `vercel-build`).
+  Stamp ONLY after a REAL verification that passed; it is not a way to skip the gate.
 
-## El orden de verificación (de prax-agent, adaptado)
+## Verification order (adapted from prax-agent)
 
-Correr **solo los checks que el proyecto soporta**, en este orden. Saltar los no
-aplicables explicando por qué (nunca en silencio):
+Run **only the checks the project supports**, in this order. Skip the inapplicable ones saying why (never
+silently):
 
 ```
-1. build / parse   → ¿compila / parsea sin error?
-2. typecheck       → tsc, pyright, mypy (si hay tipos)
-3. lint            → eslint, ruff, etc. (si hay config)
-4. test            → la suite del proyecto, o el verificador del caso
-5. behavior        → grep del patrón esperado / playwright screenshot del resultado
+1. build / parse   → does it compile / parse without error?
+2. typecheck       → tsc, pyright, mypy (if typed)
+3. lint            → eslint, ruff, etc. (if configured)
+4. test            → the project's suite, or the case verifier
+5. behaviour       → grep for the expected pattern / playwright screenshot of the result
 ```
 
-Regla: **usar el entrypoint existente del proyecto** (`npm test`, `pytest`, etc.).
-No inventar comandos. Reportar SOLO resultados reales de ejecución.
+Rule: **use the project's existing entrypoint** (`npm test`, `pytest`, …). Don't invent commands. Report
+ONLY real execution results.
 
-## El motor: verify_gate.py (multiplataforma) / verify-gate.ps1
+## The engine: verify_gate.py (any OS) / verify-gate.ps1
 
-`verify_gate.py` es el port en Python, idéntico en checks y en `.verify/verdict.json`; corre en
-Windows, macOS y Linux sin PowerShell:
+`verify_gate.py` is the Python port, identical in checks and in `.verify/verdict.json`; runs on Windows,
+macOS and Linux without PowerShell:
 
 ```bash
 python ~/.claude/skills/verify-repair/verify_gate.py --path .
@@ -67,72 +67,65 @@ python ~/.claude/skills/verify-repair/verify_gate.py --path . --verifier "node v
 python ~/.claude/skills/verify-repair/verify_gate.py --path . --must-contain dayPhase --file game.html
 ```
 
-`verify-gate.ps1` automatiza el veredicto objetivo:
-- Auto-detecta tipo de proyecto (node / python / web-estático / genérico)
-- Corre los checks disponibles
-- Escribe `.verify/verdict.json` con: resultado por check + `stateHash` (sha256 del
-  estado del árbol) + veredicto final
-- **Exit 0 solo si todo lo aplicable pasa.** Exit 1 si algo falla.
+What the gate does:
+- Auto-detects the project type (node / python / static web / generic)
+- Runs the available checks
+- Writes `.verify/verdict.json` with the result per check + `stateHash` (sha256 of the tree) + final verdict
+- **Exit 0 only if everything applicable passes.** Exit 1 if anything fails, or if there was nothing to check.
 
-El `stateHash` liga el veredicto al estado exacto del código (patrón evolve-loop):
-si el código cambia después, el veredicto anterior ya no vale → imposible de gamear.
+The `stateHash` binds the verdict to the exact state of the code (evolve-loop pattern): if the code changes
+afterwards, the previous verdict no longer counts → impossible to game.
 
+PowerShell equivalent:
 ```powershell
-# Uso básico (auto-detecta y verifica el proyecto actual):
 pwsh ~/.claude/skills/verify-repair/verify-gate.ps1 -Path .
-
-# Con verificador específico de caso (benchmark / tarea con verify.js):
 pwsh ~/.claude/skills/verify-repair/verify-gate.ps1 -Path . -Verifier "node verify.js"
-
-# Con check de comportamiento (grep de patrón que DEBE existir):
 pwsh ~/.claude/skills/verify-repair/verify-gate.ps1 -Path . -MustContain "dayPhase" -File "game.html"
 ```
 
-## El bucle repair (crítico ≠ generador)
+## The repair loop (critic ≠ generator)
 
-Si `verify-gate.ps1` sale con exit 1:
+If the gate exits 1:
 
 ```
-1. LEER el verdict.json → identificar QUÉ check falló y su output real
-2. El CRÍTICO (rol distinto del que generó) diagnostica la causa raíz
-   · NO el mismo razonamiento que produjo el error (MAR: single-agent se estanca)
-   · si fue un worker, re-derivar en conversación FRESCA (doctrina one-shot)
-3. APLICAR la corrección dirigida al check que falló
-4. RE-CORRER verify-gate.ps1
-5. Repetir hasta exit 0 o hasta MAX_REPAIR (default 3)
-6. Si tras MAX_REPAIR sigue fallando → DETENER y reportar al usuario:
-   qué falla, qué se intentó, output objetivo. Nunca reportar éxito falso.
+1. READ verdict.json → identify WHICH check failed and its real output
+2. The CRITIC (a different role from the one that generated) diagnoses the root cause
+   · NOT the same reasoning that produced the error (MAR: a single agent gets stuck)
+   · if it was a worker, re-derive in a FRESH conversation (one-shot doctrine)
+3. APPLY a fix aimed at the failing check
+4. RE-RUN the gate
+5. Repeat until exit 0 or MAX_REPAIR (default 3)
+6. If it still fails after MAX_REPAIR → STOP and report to the user:
+   what fails, what was tried, the objective output. Never report a false success.
 ```
 
-Por qué crítico separado: la investigación (MAR, arxiv 2512.20845) muestra que un
-solo agente reflexionando sobre su propio error **repite el error**. El crítico debe
-atacar desde otro ángulo: leer el output objetivo del check, no el razonamiento previo.
+Why a separate critic: research (MAR, arXiv 2512.20845) shows a single agent reflecting on its own error
+**repeats the error**. The critic must attack from another angle: read the check's objective output, not
+the previous reasoning.
 
-## Anti-gaming (de evolve-loop)
+## Anti-gaming (from evolve-loop)
 
-- El veredicto vive en `verdict.json`, ligado a `stateHash`.
-- Si alguien (modelo incluido) edita el código sin re-verificar, el hash no coincide
-  → el veredicto se considera inválido.
-- El modelo no puede escribir `verdict.json` a mano: lo escribe el script tras correr
-  los checks reales.
+- The verdict lives in `verdict.json`, bound to `stateHash`.
+- If anyone (the model included) edits the code without re-verifying, the hash no longer matches → the verdict
+  is invalid.
+- The model must not write `verdict.json` by hand: the script writes it after running the real checks.
 
-## Delegación a workers
+## Delegating to workers
 
-Al despachar a AGY/OpenCode vía `multi-cli`, incluir en la spec:
-> "Tu entrega no se acepta hasta que `verify-gate.ps1` salga con exit 0.
->  Corre la verificación tú mismo antes de marcar `.done`."
+When dispatching to other CLIs via `multi-cli`, include in the spec:
+> "Your delivery is not accepted until the verify gate exits 0. Run the verification yourself before
+>  marking `.done`."
 
-El runner de `multi-cli` corre `verify-gate.ps1` sobre el output del worker antes de
-aceptar la entrega. `edited=True` (cambió tamaño) + `verdict=pass` = entrega válida.
+The `multi-cli` runner runs the gate on the worker's output before accepting it. `edited=True` (size changed)
++ `verdict=pass` = valid delivery.
 
-## Verificación de este skill (meta)
+## Verifying this skill (meta)
 
-Probar sobre zombieswar: `verify-gate.ps1 -Path . -MustContain "dayPhase" -File "zombieswar.html"`
-debe salir exit 1 (porque `dayPhase` no existe) — demostrando que el gate detecta lo
-que el reporte humano pasó por alto.
+On a project lacking a feature: `verify_gate.py --path . --must-contain "dayPhase" --file game.html` must exit 1
+— proving the gate catches what a human report missed.
 
-## Relación
+## Related
 
-Parte del harness con [[token-router]] (qué modelo), spec-compiler de `agent-uplift`
-(qué instrucción), y `multi-cli` (cómo delegar). Veredicto objetivo es prerequisito
-del router: sin él, no se puede confiar en modelos baratos.
+Part of the harness with [[token-router]] (which model), the spec compiler in `agent-uplift` (which
+instruction) and `multi-cli` (how to delegate). An objective verdict is a prerequisite of the router: without
+it, cheap models can't be trusted.

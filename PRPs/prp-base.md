@@ -1,130 +1,131 @@
-# Sistema PRP (Product Requirements Proposal)
+# PRP system (Product Requirements Proposal)
 
-> **Los Blueprints de Jarvis** — Contrato humano-IA antes de escribir código
-
----
-
-## Qué es un PRP
-
-Un PRP es el **blueprint de una feature**. Define QUÉ construir antes de escribir una sola línea de código.
-
-| Sección | Propósito | Responsable |
-|---------|-----------|-------------|
-| **Objetivo** | Qué se construye (estado final) | Humano define |
-| **Por Qué** | Valor de negocio | Humano define |
-| **Qué** | Comportamiento + criterios de éxito | Humano + IA |
-| **Contexto** | Docs, referencias, código existente | IA investiga |
-| **Blueprint** | Fases de implementación (sin subtareas) | IA genera |
-| **Aprendizajes** | Auto-Blindaje — errores y fixes | IA actualiza |
+> **Jarvis blueprints** — the human-AI contract before writing code
 
 ---
 
-## Flujo de Trabajo
+## What a PRP is
+
+A PRP is the **blueprint of a feature**. It defines WHAT to build before a single line of code.
+
+| Section | Purpose | Owner |
+|---------|---------|-------|
+| **Goal** | What gets built (end state) | Human defines |
+| **Why** | Business value | Human defines |
+| **What** | Behaviour + success criteria | Human + AI |
+| **Context** | Docs, references, existing code | AI researches |
+| **Blueprint** | Implementation phases (no subtasks) | AI generates |
+| **Learnings** | Self-hardening — errors and fixes | AI updates |
+
+---
+
+## Workflow
 
 ```
-1. Humano: "Necesito [feature]"
-2. IA: Investiga contexto y viabilidad
-3. IA: Genera PRP-XXX-nombre.md usando este template
-4. Humano: Revisa y aprueba
-5. IA: Ejecuta Blueprint fase por fase (skill /bucle-agentico)
-6. IA: Documenta aprendizajes en el PRP (Auto-Blindaje)
+1. Human: "I need [feature]"
+2. AI: researches context and feasibility
+3. AI: generates PRP-XXX-name.md from this template
+4. Human: reviews and approves
+5. AI: executes the blueprint phase by phase (/bucle-agentico skill)
+6. AI: documents learnings in the PRP (self-hardening)
 ```
 
 ---
 
-## Nomenclatura
+## Naming
 
-- Archivos: `PRP-[NUMERO]-[descripcion-kebab].md`
-- Estados: `PENDIENTE` → `APROBADO` → `EN PROGRESO` → `COMPLETADO`
+- Files: `PRP-[NUMBER]-[kebab-description].md`
+- States: `PENDING` → `APPROVED` → `IN PROGRESS` → `DONE`
 
 ---
 
-# TEMPLATE PRP
+# PRP TEMPLATE
 
 ```markdown
-# PRP-XXX: [Título]
+# PRP-XXX: [Title]
 
-> **Estado**: PENDIENTE
-> **Fecha**: YYYY-MM-DD
-> **Proyecto**: [nombre]
-
----
-
-## Objetivo
-
-[Qué se construye — estado final deseado en 1-2 oraciones]
-
-## Por Qué
-
-| Problema | Solución |
-|----------|----------|
-| [Dolor del usuario] | [Cómo lo resuelve esta feature] |
-
-**Valor de negocio**: [Impacto medible — conversiones, tiempo, dinero]
-
-## Qué
-
-### Criterios de Éxito
-- [ ] [Criterio medible 1]
-- [ ] [Criterio medible 2]
-- [ ] [Criterio medible 3]
-
-### Comportamiento Esperado
-[Descripción del flujo principal — Happy Path]
+> **Status**: PENDING
+> **Date**: YYYY-MM-DD
+> **Project**: [name]
 
 ---
 
-## Contexto
+## Goal
 
-### Referencias
-- `src/features/[existente]/` — Patrón a seguir
+[What gets built — desired end state in 1-2 sentences]
 
-### Arquitectura Propuesta (Feature-First)
-src/features/[nueva-feature]/
+## Why
+
+| Problem | Solution |
+|---------|----------|
+| [User pain] | [How this feature solves it] |
+
+**Business value**: [Measurable impact — conversions, time, money]
+
+## What
+
+### Success criteria
+- [ ] [Measurable criterion 1]
+- [ ] [Measurable criterion 2]
+- [ ] [Measurable criterion 3]
+
+### Expected behaviour
+[Description of the main flow — happy path]
+
+---
+
+## Context
+
+### References
+- `src/features/[existing]/` — pattern to follow
+
+### Proposed architecture (feature-first)
+src/features/[new-feature]/
 ├── components/
 ├── hooks/
 ├── services/
 └── types/
 
-### Modelo de Datos (si aplica)
-CREATE TABLE [tabla] (
+### Data model (if applicable)
+CREATE TABLE [table] (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+> Migrations are applied BEFORE merging; put the SQL in the PR body (field-lessons #18).
 
 ---
 
-## Blueprint (Assembly Line)
+## Blueprint (assembly line)
 
-> IMPORTANTE: Solo definir FASES. Las subtareas se generan al entrar a cada fase
-> con el skill /bucle-agentico (mapear contexto → generar subtareas → ejecutar)
+> IMPORTANT: only define PHASES. Subtasks are generated when entering each phase
+> with the /bucle-agentico skill (map context → generate subtasks → execute)
 
-### Fase 1: [Nombre]
-**Objetivo**: [Qué se logra al completar esta fase]
-**Validación**: [Cómo verificar que está completa]
+### Phase 1: [Name]
+**Goal**: [What is achieved when this phase is complete]
+**Validation**: [How to verify it is complete]
 
-### Fase 2: [Nombre]
-**Objetivo**: [Qué se logra]
-**Validación**: [Cómo verificar]
+### Phase 2: [Name]
+**Goal**: [What is achieved]
+**Validation**: [How to verify]
 
-### Fase N: Validación Final
-**Objetivo**: Sistema funcionando end-to-end
-**Validación**:
-- [ ] npm run build exitoso
-- [ ] Playwright screenshot confirma UI
-- [ ] Criterios de éxito cumplidos
+### Phase N: Final validation
+**Goal**: system working end to end
+**Validation**:
+- [ ] verify gate exits 0 (build, typecheck, lint, tests)
+- [ ] Playwright screenshot confirms the UI
+- [ ] Success criteria met, each with its evidence
 
 ---
 
-## Aprendizajes (Auto-Blindaje)
+## Learnings (self-hardening)
 
-> Esta sección CRECE con cada error encontrado durante la implementación.
-> El mismo error NUNCA ocurre dos veces.
+> This section GROWS with every error found during implementation.
+> The same error NEVER happens twice.
 
-### [YYYY-MM-DD]: [Título del aprendizaje]
-- **Error**: [Qué falló]
-- **Fix**: [Cómo se arregló]
-- **Aplicar en**: [Dónde más aplica este conocimiento]
+### [YYYY-MM-DD]: [Learning title]
+- **Error**: [What failed]
+- **Fix**: [How it was fixed]
+- **Applies to**: [Where else this knowledge applies]
 
 ---
 
@@ -133,13 +134,13 @@ CREATE TABLE [tabla] (
 - [ ] [Gotcha 1]
 - [ ] [Gotcha 2]
 
-## Anti-Patrones
+## Anti-patterns
 
-- NO crear nuevos patrones si los existentes funcionan
-- NO ignorar errores de TypeScript
-- NO hardcodear valores
+- DON'T create new patterns when the existing ones work
+- DON'T ignore TypeScript errors
+- DON'T hard-code values
 
 ---
 
-*PRP pendiente aprobación. No se ha modificado código.*
+*PRP pending approval. No code has been modified.*
 ```

@@ -1,7 +1,5 @@
 <div align="center">
 
-<!-- BANNER PLACEHOLDER — replace with your image -->
-<!-- ![Jarvis-254-Agent Banner](assets/banner.png) -->
 
 # 🤖 Jarvis-254-Agent
 
@@ -14,6 +12,10 @@
 [![Stars](https://img.shields.io/github/stars/Ignvvcio254/Jarvis-254-Agent?style=social)](https://github.com/Ignvvcio254/Jarvis-254-Agent/stargazers)
 
 **Not a replacement. Not a fork. A unification.**
+
+<img src="assets/demo.gif" alt="Real terminal output: install.py merging config, the verify gate failing on broken code then passing after the fix, autopilot hooks routing a task, capturing a correction and guarding a recursive delete, and the behaviour bench selftest" width="820">
+
+<sub>Every line above is real output, rendered by <code>scripts/make_demo_gif.py</code>.</sub>
 
 [📦 Install](#-installation) · [⚡ Quick Start](#-quick-start) · [📖 Docs](docs/README.md) · [🤝 Credits](#-credits--community) · [🛠 Contributing](CONTRIBUTING.md)
 

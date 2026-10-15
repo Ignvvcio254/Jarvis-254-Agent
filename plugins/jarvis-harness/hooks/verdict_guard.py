@@ -176,20 +176,20 @@ def main():
 
     rel = nf.name
     if kind == "fail":
-        msg = (f"[verdict-guard] {rel} NO pasa la verificación de sintaxis "
-               f"(node --check / py_compile). Arréglalo antes de reportar.")
+        msg = (f"[verdict-guard] {rel} FAILS its syntax check "
+               f"(node --check / py_compile). Fix it before reporting.")
     elif vmtime is None:
-        msg = (f"[verdict-guard] Editaste {rel} (no auto-verificable barato) y NO existe "
-               f"`.verify/verdict.json`. Corre el veredicto objetivo antes de reportar: "
-               f"`python {GATE} --path .`, o si ya "
-               f"verificaste con tsc/build, séllalo: `python {STAMP} tsc`.")
+        msg = (f"[verdict-guard] You edited {rel} (not cheaply auto-verifiable) and there is NO "
+               f"`.verify/verdict.json`. Run the objective verdict before reporting: "
+               f"`python {GATE} --path .`, or if you already "
+               f"verified with tsc/build, stamp it: `python {STAMP} tsc`.")
     elif vmtime is False:
-        msg = (f"[verdict-guard] El último veredicto NO es 'pass'. No reportes éxito: "
-               f"repara y re-verifica antes de cerrar.")
+        msg = (f"[verdict-guard] The last verdict is NOT 'pass'. Don't report success: "
+               f"repair and re-verify before closing.")
     else:
-        msg = (f"[verdict-guard] {rel} cambió después del último veredicto pass. "
-               f"Si ya lo verificaste (tsc/build/deploy), séllalo: "
-               f"`python {STAMP} tsc`. Si no, corre verify-gate.")
+        msg = (f"[verdict-guard] {rel} changed after the last passing verdict. "
+               f"If you already verified it (tsc/build/deploy), stamp it: "
+               f"`python {STAMP} tsc`. Otherwise run the verify gate.")
     emit(msg)
     sys.exit(0)
 

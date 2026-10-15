@@ -1,90 +1,101 @@
 ---
 name: agent-uplift
-description: Sistema para que modelos baratos/libres alcancen RESULTADOS de tarea clase Fable 5 mediante harness (specs compiladas, bucle generate→verify→repair, descomposición, router por evidencia y anti-patrones por modelo). Usar cuando el usuario pida elevar la calidad de workers multi-CLI, ejecutar el benchmark UPLIFT, o cerrar la brecha modelo-barato vs frontier. Deadline del proyecto: 2026-06-22.
+description: System that makes cheap/free models deliver frontier-class TASK RESULTS through a harness (compiled specs, generate→verify→repair loop, decomposition, evidence-based routing and per-model anti-patterns). Use when raising the quality of workers (other CLIs, subagents, gateway models), running an uplift benchmark, or closing the cheap-model vs frontier gap.
 ---
 
-# AGENT-UPLIFT — resultados clase Fable con cualquier modelo
+# AGENT-UPLIFT — frontier-class results with any model
 
-## Tesis (honesta)
+## Thesis (honest)
 
-No se puede convertir un modelo de 26B en Fable 5 — los pesos no se tocan. Lo que SÍ se iguala es el **resultado de la tarea**: un modelo barato dentro de un harness disciplinado (spec perfecta + verificación objetiva + reparación acotada + descomposición) produce salidas que pasan la misma revisión que aceptaría una entrega de Fable. La brecha barato-vs-frontier en tareas agénticas es mayormente de **contexto, verificación y reintento** — no de inteligencia bruta. Eso es harness, y el harness es nuestro.
+You cannot turn a 26B model into a frontier model — the weights don't change. What you CAN match is the **task
+result**: a cheap model inside a disciplined harness (perfect spec + objective verification + bounded repair
++ decomposition) produces outputs that pass the same review a frontier delivery would. The cheap-vs-frontier
+gap on agentic tasks is mostly about **context, verification and retries** — not raw intelligence. That's
+harness, and the harness is ours.
 
-Evidencia semilla (sesión 2026-06-09/10, banco de pruebas Zombies War):
-- gemma falló QA sobre archivo 71KB (sesión agotada) → con continuación `-c` + check de entregable, lo completó.
-- Opus 4.6 one-shot entregó F3 completa a la primera con spec de 6 puntos numerados.
-- Sonnet omitió 1 de 6 puntos de spec → detectado por checklist grep → corrección acotada lo cerró.
-→ El mismo modelo rinde niveles distintos según la calidad del spec y del bucle. Esa es la palanca.
+Seed evidence (benchmark on a real game codebase):
+- A small model failed QA on a 71 KB file (session exhausted) → with session continuation + a deliverable
+  check, it completed it.
+- A top model delivered a full phase first time with a 6-point numbered spec.
+- A mid model skipped 1 of 6 spec points → caught by a grep checklist → a bounded fix closed it.
+→ The same model performs at different levels depending on the spec and the loop. That's the lever.
 
-## Arquitectura (5 componentes)
+## Architecture (5 components)
 
-### 1. SPEC-COMPILER — compilar el pedido en one-shot perfecto
-> Plantilla operativa: `templates/spec-compilada.md` (llenar + checklist antes de despachar).
-Todo despacho pasa por compilación antes de llegar al worker:
-- **Contexto mínimo suficiente**: qué existe (funciones/contratos exactos con nombres reales — verificados por grep, jamás supuestos), qué NO tocar.
-- **Puntos numerados auditables** (1..N), cada uno con criterio de aceptación observable.
-- **Contrato de salida**: archivos exactos, formato, "resumen máx N líneas".
-- **Prefijo de ejecución** para modelos que planifican sin ejecutar: "esta tarea se completa ÚNICAMENTE escribiendo código con tus herramientas; no describas planes".
-- **Inyección de anti-patrones** del modelo destino (componente 4).
-- Presupuesto: tarea para modelo barato ≤ 6 puntos y ≤ 1 archivo grande; si excede → descomponer (componente 3).
+### 1. SPEC COMPILER — compile the request into a perfect one-shot
+> Working template: `templates/spec-template.md` (fill it + run the checklist before dispatching).
+Every dispatch is compiled before it reaches the worker:
+- **Minimum sufficient context**: what exists (exact functions/contracts with real names — verified by grep,
+  never assumed), what NOT to touch.
+- **Auditable numbered points** (1..N), each with an observable acceptance criterion.
+- **Output contract**: exact files, format, "summary max N lines".
+- **Execution prefix** for models that plan instead of executing: "this task is complete ONLY when you write
+  code with your tools; do not describe plans".
+- **Injected anti-patterns** of the target model (component 4).
+- Budget: a cheap-model task has ≤ 6 points and ≤ 1 large file; if it exceeds → decompose (component 3).
 
-### 2. VERIFY-REPAIR — bucle generate→verify→repair
-Tras cada entrega, verificadores OBJETIVOS (no opinión):
-- `edited`/`Test-Path` de entregables (del .done del runner multi-cli).
-- Sintaxis: node --check / linter del lenguaje.
-- Checklist grep: un patrón de evidencia por punto numerado.
-- Funcional: Playwright/curl/test runner según tipo (tabla de verificación de CLAUDE.md).
-Resultado → veredicto: ACEPTADA / REPARAR (one-shot de reparación SOLO con los puntos fallidos + evidencia del fallo) / ESCALAR.
-Máx 2 reparaciones por tarea; la reparación es conversación FRESCA (anti contaminación).
+### 2. VERIFY-REPAIR — generate→verify→repair loop
+After each delivery, OBJECTIVE verifiers (not opinion):
+- Deliverables exist / were edited (the `.done` signal of the multi-cli runner).
+- Syntax: `node --check` / the language's linter.
+- Grep checklist: one evidence pattern per numbered point.
+- Functional: Playwright / curl / test runner depending on the type.
+Result → verdict: ACCEPTED / REPAIR (one-shot repair with ONLY the failed points + failure evidence) / ESCALATE.
+Max 2 repairs per task; the repair runs in a FRESH conversation (no contamination).
 
-**Crítico ≠ generador (MAR, arxiv 2512.20845):** el que diagnostica y repara NO debe ser
-el mismo razonamiento que produjo el error — un solo agente reflexionando sobre su propio
-fallo lo repite ("cognitive entrenchment"). Reglas:
-- El crítico parte del OUTPUT OBJETIVO del verificador (qué check falló, su salida real),
-  no del razonamiento previo del generador.
-- Si el generador fue un worker (gemma/sonnet/AGY) → la reparación va a conversación fresca,
-  idealmente con un modelo distinto o tier superior (router por evidencia).
-- Si el generador fue Jarvis mismo → adoptar explícitamente rol de crítico: leer el
-  `verdict.json` de [[verify-repair]] y atacar desde otro ángulo, no re-justificar.
-- Motor objetivo de este componente: el skill [[verify-repair]] (`verify-gate.ps1`) provee
-  el veredicto; agent-uplift provee la política de reparación (cuántos intentos, quién repara).
+**Critic ≠ generator (MAR, arXiv 2512.20845):** whoever diagnoses and repairs must NOT be the same reasoning
+that produced the error — a single agent reflecting on its own failure repeats it ("cognitive entrenchment").
+Rules:
+- The critic starts from the verifier's OBJECTIVE OUTPUT (which check failed, its real output), not from the
+  generator's reasoning.
+- If the generator was a worker → the repair goes to a fresh conversation, ideally a different model or a
+  higher tier (evidence-based routing).
+- If the generator was the main agent → explicitly take the critic role: read the [[verify-repair]]
+  `verdict.json` and attack from another angle, don't re-justify.
+- Engine: [[verify-repair]] provides the verdict; agent-uplift provides the repair policy (how many attempts,
+  who repairs).
 
-### 3. DECOMPOSE-ROUTE — descomposición y enrutado por evidencia
-- Tarea grande → subtareas del tamaño que el tier barato resuelve bien (datos del benchmark, no intuición).
-- Router: tipo de tarea × historial de éxito por modelo (tabla viva en `benchmark/results.md`).
-- Integración de piezas: siempre tier alto (Opus/Jarvis) — la integración es donde los baratos fallan.
+### 3. DECOMPOSE-ROUTE — decomposition and evidence-based routing
+- Big task → subtasks sized for what the cheap tier solves well (benchmark data, not intuition).
+- Router: task type × success history per model (a living table in `benchmark/results.md`).
+- Integrating the pieces: always a high tier — integration is where cheap models fail.
 
-### 4. ANTI-PATTERN CATALOG — el "entrenamiento" sin tocar pesos
-`~/.claude/skills/agent-uplift/antipatterns/<modelo>.md` — cada fallo observado se cataloga:
-`[fecha] · síntoma · causa · CONTRAMEDIDA DE PROMPT (texto inyectable)`.
-El SPEC-COMPILER inyecta las contramedidas del modelo destino en cada spec. El catálogo solo crece → el mismo modelo mejora con cada tarea sin reentrenar. Iniciales:
-- **gemma/OC**: se queda sin sesión en archivos >50KB → contramedida: "no leas archivos completos; usa búsquedas dirigidas" + partir tarea.
-- **Sonnet/AGY**: omite puntos de specs largas → contramedida: "antes de terminar, relee los puntos 1..N y verifica cada uno".
-- **Sonnet/Opus/AGY**: responde plan sin ejecutar en -p → contramedida: prefijo de ejecución.
+### 4. ANTI-PATTERN CATALOG — "training" without touching weights
+`~/.claude/skills/agent-uplift/antipatterns/<model>.md` — every observed failure is catalogued:
+`[date] · symptom · cause · PROMPT COUNTERMEASURE (injectable text)`.
+The spec compiler injects the target model's countermeasures into every spec. The catalog only grows → the
+same model improves with every task without retraining. Starters:
+- **Small models in agentic CLIs**: run out of session on files >50 KB → "don't read whole files; use targeted
+  searches" + split the task.
+- **Mid models on long specs**: skip points → "before finishing, re-read points 1..N and check each one".
+- **Any model in headless `-p` mode**: answers with a plan without executing → execution prefix.
 
-### 5. BENCHMARK — medir o no existe mejora
-Suite en `<proyecto>/benchmark/`: 10 tareas reproducibles sobre un codebase de prueba (feature acotada, fix con repro, refactor, módulo nuevo, QA, integración, edge cases, docs técnicas, test suite, tarea con trampa anti-instrucciones).
-Rúbrica por tarea: % puntos del spec con evidencia + sintaxis + funcional + nº reparaciones usadas. Score 0-100.
-Protocolo: medir cada modelo SIN harness (baseline) y CON harness completo. Métrica de éxito del proyecto: **tier gratis con harness ≥ 90% del score de Opus sin harness** en la suite.
+### 5. BENCHMARK — if you don't measure it, it didn't improve
+Suite in `<project>/benchmark/`: ~10 reproducible tasks on a test codebase (bounded feature, fix with repro,
+refactor, new module, QA, integration, edge cases, technical docs, test suite, a task with an
+anti-instruction trap).
+Rubric per task: % of spec points with evidence + syntax + functional + repairs used. Score 0-100.
+Protocol: measure each model WITHOUT the harness (baseline) and WITH the full harness. Success metric:
+**free tier with harness ≥ 90% of the top model's score without harness**. For behaviour (rules), use
+`evals/jarvis-eval.mjs`.
 
-## Ciclo de iteración (bucle agéntico permanente)
+## Iteration cycle (permanent agentic loop)
 
 ```
-benchmark → peor brecha identificada → mejorar el componente responsable
-(spec? verificador? router? anti-patrón nuevo?) → re-benchmark → repetir
+benchmark → worst gap → improve the responsible component
+(spec? verifier? router? new anti-pattern?) → re-benchmark → repeat
 ```
-Cada iteración deja: score nuevo en `benchmark/results.md` + anti-patrones nuevos + cambio concreto en un componente. Nunca dos iteraciones sin medición entre ellas.
+Each iteration leaves: a new score in `benchmark/results.md` + new anti-patterns + one concrete change in a
+component. Never two iterations without a measurement between them.
 
-## Relación con otras skills
-- `multi-cli`: es la capa de EJECUCIÓN (terminales, runners, .done, TTS). agent-uplift es la capa de CALIDAD encima.
-- `bucle-agentico`: gobierna las fases del proyecto UPLIFT (BLUEPRINT, just-in-time).
-- Límites éticos: esto eleva capacidad de ingeniería de software del agente. Nada de evasión de salvaguardas, ciber-ofensivo ni biología — fuera de alcance por diseño.
+## Related skills
+- `multi-cli`: the EXECUTION layer (terminals, runners, `.done`, notifications). agent-uplift is the QUALITY
+  layer on top.
+- `bucle-agentico`: governs the phases of a project (blueprint, just-in-time context).
+- Ethical limits: this raises software-engineering capability. No safeguard evasion, offensive cyber or
+  biology — out of scope by design.
 
-## Estado del proyecto
-- F0 benchmark: COMPLETO (suite C1-C8; baseline opus46=100, gemma=100 fácil / 78 duro — brecha en C8 inyección).
-- F1 verify-repair: COMPLETO y validado. F2 token-router: COMPLETO. F3 scratchpad: COMPLETO. F4 spec-compiler + crítico separado: COMPLETO. F5 integración multi-cli + verificación adaptativa: EN CURSO.
-- Nota: el gate "2026-06-22" era el deadline de Fable 5 gratis; Fable se suspendió el 12-jun. Gate vigente: feature larga de zombieswar end-to-end auto-verificada.
-
-## Integración harness (skills hermanas)
-- [[verify-repair]] (F1) provee el veredicto objetivo (motor del componente 2 VERIFY-REPAIR).
-- [[token-router]] (F2) provee el router por dificultad (motor del componente 3 DECOMPOSE-ROUTE).
-- [[scratchpad]] (F3) provee memoria + correction-detection (alimenta el componente 4 ANTI-PATTERN CATALOG).
+## Harness integration (sibling skills)
+- [[verify-repair]] provides the objective verdict (engine of component 2).
+- [[token-router]] provides routing by difficulty (engine of component 3).
+- [[scratchpad]] provides memory + correction detection (feeds component 4).

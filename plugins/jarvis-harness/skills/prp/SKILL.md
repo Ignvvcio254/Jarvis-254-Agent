@@ -1,96 +1,93 @@
 ---
 name: prp
-description: "Planificar una feature compleja antes de implementarla. Genera un PRP (Product Requirements Proposal) con objetivo, comportamiento esperado, modelo de datos, y fases de implementación. Activar SIEMPRE antes de bucle-agentico, cuando la tarea involucra múltiples archivos/fases coordinadas, o cuando el usuario dice: planea esto, dame un plan, quiero agregar algo grande, necesito un sistema de X, blueprint esto."
+description: "Plan a complex feature before implementing it. Generates a PRP (Product Requirements Proposal) with goal, expected behaviour, data model and implementation phases. Activate ALWAYS before bucle-agentico, when the task involves multiple coordinated files/phases, or when the user says: plan this, give me a plan, I want to add something big, I need a system for X, blueprint this."
 context: fork
 allowed-tools: Read, Write, Edit, Grep, Glob
 ---
 
-# Skill: Generar PRP (Product Requirements Proposal)
+# Skill: Generate a PRP (Product Requirements Proposal)
 
-> Generar un PRP para: $ARGUMENTS
-
----
-
-## Qué es un PRP
-
-Un PRP (Product Requirements Proposal) es el **blueprint de una pieza de software**. Define QUÉ construir antes de escribir una sola línea de código.
-
-Es el contrato humano-IA. El humano define el objetivo y el por qué. Jarvis investiga el contexto, propone la arquitectura, y genera el plan de fases. Juntos validan antes de ejecutar.
-
-**Sin PRP**: vibe coding al aire, código espagueti, features que no encajan.
-**Con PRP**: arquitectura clara, fases definidas, aprendizajes que persisten (auto-blindaje).
+> Generate a PRP for: $ARGUMENTS
 
 ---
 
-## Proceso
+## What a PRP is
 
-### Paso 1: Leer el template base
+A PRP is the **blueprint of a piece of software**. It defines WHAT to build before a single line of code.
 
-Lee el template en:
+It is the human-AI contract. The human defines the goal and the why. The agent researches the context,
+proposes the architecture and generates the phase plan. Together they validate before executing.
+
+**Without a PRP**: vibe coding, spaghetti code, features that don't fit.
+**With a PRP**: clear architecture, defined phases, learnings that persist (self-hardening).
+
+---
+
+## Process
+
+### Step 1: Read the base template
+
 ```
-~/.claude/PRPs/prp-base.md
+~/.claude/PRPs/prp-base.md   (or PRPs/prp-base.md in the Jarvis repo)
 ```
 
-### Paso 2: Entrevistar si falta contexto
+### Step 2: Interview if context is missing
 
-Si `$ARGUMENTS` no tiene suficiente detalle, hacer preguntas directas:
+If `$ARGUMENTS` lacks detail, ask directly:
 
-1. **Objetivo**: ¿Qué quieres construir? (estado final en 1-2 oraciones)
-2. **Por qué**: ¿Qué problema resuelve? ¿Cuál es el valor?
-3. **Criterios de éxito**: ¿Cómo sabes que está terminado? (3-5 checkboxes medibles)
-4. **Restricciones**: ¿Hay algo que NO deba hacer o alguna dependencia crítica?
+1. **Goal**: What do you want to build? (end state in 1-2 sentences)
+2. **Why**: What problem does it solve? What's the value?
+3. **Success criteria**: How do you know it's done? (3-5 measurable checkboxes)
+4. **Constraints**: Anything it must NOT do, or a critical dependency?
 
-No hacer las 4 preguntas si el usuario ya dio suficiente contexto.
+Don't ask all 4 if the user already gave enough context.
 
-### Paso 3: Investigar contexto del codebase
+### Step 3: Research the codebase
 
-Antes de escribir el PRP, investigar:
-- **Grep/Glob**: Buscar código existente relacionado con la feature
-- **Read**: Leer archivos relevantes para entender patrones actuales
-- Buscar features similares ya implementadas para reutilizar patrones
+Before writing the PRP:
+- **Grep/Glob**: find existing code related to the feature
+- **Read**: read relevant files to understand current patterns
+- Look for similar features already implemented to reuse their patterns
 
-### Paso 4: Generar el PRP
+### Step 4: Generate the PRP
 
-Crear el archivo PRP siguiendo el template de `prp-base.md`:
+Create the PRP following `prp-base.md`:
 
-**Nombre del archivo**: `.claude/PRPs/PRP-XXX-{feature-name}.md`
+**File name**: `.claude/PRPs/PRP-XXX-{feature-name}.md` — `XXX` sequential, `{feature-name}` in kebab-case.
 
-Donde `XXX` es número secuencial y `{feature-name}` en kebab-case.
+**Mandatory content**:
+- Goal (1-2 sentences)
+- Why (problem/solution table + value)
+- Success criteria (measurable checkboxes)
+- Expected behaviour (happy path)
+- Context (references, proposed architecture, data model if applicable)
+- Blueprint (ONLY phases, no subtasks — bucle-agentico generates those)
+- Empty sections for Learnings, Gotchas, Anti-patterns
 
-**Contenido obligatorio**:
-- Objetivo (1-2 oraciones)
-- Por Qué (tabla problema/solución + valor)
-- Criterios de Éxito (checkboxes medibles)
-- Comportamiento Esperado (happy path)
-- Contexto (referencias, arquitectura propuesta, modelo de datos si aplica)
-- Blueprint (SOLO fases, sin subtareas — las subtareas las genera bucle-agentico)
-- Secciones vacías de Aprendizajes, Gotchas, Anti-Patrones
+### Step 5: Present it to the user
 
-### Paso 5: Presentar al usuario
+Summarise: goal, number of phases, key architecture decisions — and ask whether to adjust before approving.
 
-Mostrar resumen del PRP:
-- Objetivo
-- Número de fases
-- Decisiones de arquitectura clave
-- Preguntar si quiere ajustar antes de aprobar
-
-**NO implementar nada todavía.** El PRP debe ser aprobado antes de ejecutar.
+**Implement NOTHING yet.** The PRP must be approved before executing.
 
 ---
 
-## Después del PRP
+## After the PRP
 
-Una vez aprobado, la implementación se hace con el skill `/bucle-agentico`, que usa el PRP como guía para ejecutar fase por fase con mapeo de contexto just-in-time.
+Once approved, implementation runs with `/bucle-agentico`, which uses the PRP as its guide, phase by phase with
+just-in-time context mapping. For work spanning several sessions, turn the success criteria into a
+`long-run-harness` feature list.
 
-Los aprendizajes descubiertos durante la implementación se documentan de vuelta en el PRP (sección Aprendizajes) — **auto-blindaje activo**.
+Learnings discovered during implementation are written back into the PRP (Learnings section) — **active
+self-hardening**.
 
 ---
 
-## Reglas
+## Rules
 
-- SIEMPRE leer `prp-base.md` antes de generar
-- NUNCA generar subtareas dentro de las fases (eso lo hace bucle-agentico)
-- NUNCA implementar código en este skill (solo generar el documento)
-- SIEMPRE investigar el codebase antes de proponer arquitectura
-- El PRP se crea en estado `PENDIENTE` hasta que el usuario apruebe
-- Los PRPs viven en `.claude/PRPs/` dentro del proyecto actual
+- ALWAYS read `prp-base.md` before generating
+- NEVER generate subtasks inside the phases (bucle-agentico does that)
+- NEVER implement code in this skill (only the document)
+- ALWAYS research the codebase before proposing architecture
+- The PRP is created in `PENDING` state until the user approves
+- PRPs live in `.claude/PRPs/` inside the current project

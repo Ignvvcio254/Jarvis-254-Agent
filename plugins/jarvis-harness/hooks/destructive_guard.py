@@ -33,7 +33,7 @@ def evaluar(comando: str):
     if DESECHABLE.search(comando) and not GIT_DESTRUCTIVO.search(comando):
         return None
     fragmento = comando.strip().replace("\n", " ")[:160]
-    return f"Borrado masivo o irreversible: `{fragmento}`. Regla de Jarvis: confirmar con el usuario ANTES (qué se borra y si hay respaldo)."
+    return f"Mass or irreversible deletion: `{fragmento}`. Jarvis rule: confirm with the user FIRST (what gets deleted and whether there is a backup)."
 
 
 # Herramientas MCP con efecto irreversible o externo (borrar, comprar, fusionar, firmar, enviar formularios, cancelar, reiniciar).
@@ -44,7 +44,7 @@ MODOS_SIN_HUMANO = {"auto", "bypasspermissions", "bypass", "dontask"}
 
 def evaluar_herramienta(nombre: str):
     if nombre and MCP_RIESGO.match(nombre):
-        return f"Herramienta MCP irreversible o con efecto externo: `{nombre}`. Regla de Jarvis: confirmar con el usuario ANTES de ejecutarla."
+        return f"Irreversible MCP tool or one with external effects: `{nombre}`. Jarvis rule: confirm with the user BEFORE running it."
     return None
 
 
@@ -59,7 +59,7 @@ def main() -> int:
     if motivo:
         decision = "deny" if modo in MODOS_SIN_HUMANO else "ask"
         if decision == "deny":
-            motivo += " (modo sin confirmación humana: bloqueado; pídale la confirmación en texto)"
+            motivo += " (no human confirmation available: blocked; ask the user to confirm in text)"
         print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": decision, "permissionDecisionReason": motivo}}, ensure_ascii=True))
     return 0
 

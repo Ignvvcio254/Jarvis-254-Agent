@@ -1,174 +1,168 @@
 ---
 name: bucle-agentico
-description: "Ejecutar features complejas por fases con mapeo de contexto real ANTES de cada fase. La innovacion clave: NO generar todas las subtareas al inicio — mapear contexto just-in-time y generar subtareas basadas en la realidad actual del sistema. Activar cuando la tarea toca multiples archivos coordinados, requiere cambios en DB + codigo + UI, tiene fases que dependen una de otra, o cuando un PRP fue aprobado y hay que implementarlo."
+description: "Agentic loop: execute complex features in phases, mapping the real context BEFORE each phase. The key idea: DON'T generate every subtask up front — map context just in time and generate subtasks from the system's actual state. Activate when the task touches multiple coordinated files, needs DB + code + UI changes, has phases that depend on each other, or when an approved PRP must be implemented."
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
-# Modo BLUEPRINT del Bucle Agentico
+# BLUEPRINT mode of the agentic loop
 
-> "No planifiques lo que no entiendes. Mapea contexto, luego planifica."
+> "Don't plan what you don't understand. Map the context, then plan."
 
-El modo BLUEPRINT es para sistemas complejos que requieren construccion por fases con mapeo de contexto just-in-time.
-
----
-
-## Cuando Usar
-
-- La tarea requiere multiples componentes coordinados
-- Involucra cambios en DB + codigo + UI
-- Tiene fases que dependen una de otra
-- Requiere entender contexto antes de implementar
-- Un PRP fue aprobado y hay que ejecutarlo
+BLUEPRINT mode is for complex systems built in phases with just-in-time context mapping.
 
 ---
 
-## La Innovacion: Mapeo de Contexto Just-In-Time
+## When to use
 
-### Enfoque Tradicional (MALO)
-
-Recibir problema → Generar TODAS las tareas y subtareas → Ejecutar linealmente.
-Problema: Las subtareas se generan basandose en SUPOSICIONES, no en contexto real.
-
-### Enfoque BLUEPRINT (CORRECTO)
-
-```
-Recibir problema → Generar solo FASES (sin subtareas)
-    |
-ENTRAR en Fase 1 → MAPEAR contexto real
-    |
-GENERAR subtareas basadas en contexto REAL → Ejecutar Fase 1
-    |
-ENTRAR en Fase 2 → MAPEAR contexto (incluyendo lo construido en Fase 1)
-    |
-GENERAR subtareas de Fase 2 → Ejecutar → ... repetir ...
-```
-
-Ventaja: Cada fase se planifica con informacion REAL del estado actual del sistema.
+- The task needs several coordinated components
+- It involves DB + code + UI changes
+- It has phases that depend on each other
+- You need to understand context before implementing
+- A PRP was approved and must be executed
 
 ---
 
-## El Flujo BLUEPRINT: 5 Pasos
+## The idea: just-in-time context mapping
 
-### PASO 1: DELIMITAR EN FASES
+### Traditional approach (BAD)
 
-- Entender el problema FINAL completo
-- Romper en FASES ordenadas cronologicamente
-- Identificar dependencias entre fases
-- NO generar subtareas todavia
-- Usar TodoWrite para registrar las fases
+Receive the problem → generate ALL tasks and subtasks → execute linearly.
+Problem: subtasks are generated from ASSUMPTIONS, not real context.
 
-### PASO 2: ENTRAR EN FASE N — MAPEAR CONTEXTO
-
-ANTES de generar subtareas, explorar:
-
-**Codebase:**
-- Que archivos/componentes existen relacionados?
-- Que patrones usa el proyecto actualmente?
-- Hay codigo que se puede reutilizar?
-
-**Estado actual del sistema:**
-- Que construi en fases anteriores?
-- Que puedo asumir que ya existe?
-- Que restricciones tengo?
-
-DESPUES de mapear, generar subtareas especificas y actualizar TodoWrite.
-
-### PASO 3: EJECUTAR SUBTAREAS DE LA FASE
+### BLUEPRINT approach (RIGHT)
 
 ```
-WHILE subtareas pendientes en fase actual:
-  1. Marcar subtarea como in_progress en TodoWrite
-  2. Ejecutar la subtarea
-  3. Usar herramientas segun el juicio (playwright, build, grep, etc.)
-  4. Validar resultado
-     - Si hay error → AUTO-BLINDAJE (paso 3.5)
-     - Si esta bien → Marcar completed
-  5. Siguiente subtarea
-Fase completada cuando todas las subtareas done.
+Receive the problem → generate only PHASES (no subtasks)
+    |
+ENTER Phase 1 → MAP the real context
+    |
+GENERATE subtasks from REAL context → execute Phase 1
+    |
+ENTER Phase 2 → MAP context (including what Phase 1 built)
+    |
+GENERATE Phase 2 subtasks → execute → ... repeat ...
 ```
 
-### PASO 3.5: AUTO-BLINDAJE (cuando hay errores)
+Each phase is planned with REAL information about the system's current state.
 
-Cuando algo falla:
-1. ARREGLA el codigo
-2. TESTEA que funcione
-3. DOCUMENTA el aprendizaje:
+---
+
+## The BLUEPRINT flow: 5 steps
+
+### STEP 1: SPLIT INTO PHASES
+
+- Understand the complete FINAL problem
+- Break it into chronologically ordered PHASES
+- Identify dependencies between phases
+- DON'T generate subtasks yet
+- Track the phases with the todo list
+
+### STEP 2: ENTER PHASE N — MAP CONTEXT
+
+BEFORE generating subtasks, explore:
+
+**Codebase:** Which related files/components exist? Which patterns does the project use? What can be reused?
+
+**System state:** What did earlier phases build? What can I assume exists? What constraints do I have?
+
+AFTER mapping, generate specific subtasks and update the todo list.
+
+### STEP 3: EXECUTE THE PHASE'S SUBTASKS
+
+```
+WHILE subtasks pending in the current phase:
+  1. Mark the subtask in_progress
+  2. Execute it
+  3. Use tools as judgement dictates (playwright, build, grep, ...)
+  4. Validate the result (verify-repair gate)
+     - Error → SELF-HARDENING (step 3.5)
+     - OK    → mark completed
+  5. Next subtask
+The phase is complete when every subtask is done.
+```
+
+### STEP 3.5: SELF-HARDENING (when something fails)
+
+1. FIX the code
+2. TEST that it works
+3. DOCUMENT the learning:
 
 ```markdown
-### [YYYY-MM-DD]: [Titulo corto]
-- **Error**: [Que fallo exactamente]
-- **Fix**: [Como se arreglo]
-- **Aplicar en**: [Donde mas aplica este conocimiento]
+### [YYYY-MM-DD]: [Short title]
+- **Error**: [What exactly failed]
+- **Fix**: [How it was fixed]
+- **Applies to**: [Where else this knowledge applies]
 ```
 
-| Tipo de Error | Donde Documentar |
-|---------------|-----------------|
-| Especifico de esta feature | PRP actual (seccion Aprendizajes) |
-| Aplica a multiples features | Skill relevante en ~/.claude/skills/ |
-| Aplica a TODO el proyecto | CLAUDE.md del proyecto |
+| Kind of error | Where to document |
+|---------------|-------------------|
+| Specific to this feature | Current PRP (Learnings section) |
+| Applies to several features | The relevant skill in ~/.claude/skills/ |
+| Applies to the WHOLE project | The project's CLAUDE.md |
+| A general engineering law | The `field-lessons` skill |
 
-El conocimiento persiste. El mismo error NUNCA ocurre dos veces.
+Knowledge persists. The same error NEVER happens twice.
 
-### PASO 4: TRANSICIONAR A SIGUIENTE FASE
+### STEP 4: MOVE TO THE NEXT PHASE
 
-- Confirmar que la fase actual esta REALMENTE completa
-- NO asumir que todo salio como se planeo
-- Volver a PASO 2 con la siguiente fase
-- El contexto ahora INCLUYE lo construido
+- Confirm the current phase is REALLY complete
+- DON'T assume everything went as planned
+- Back to STEP 2 with the next phase
+- The context now INCLUDES what was built
 
-### PASO 5: VALIDACION FINAL
+### STEP 5: FINAL VALIDATION
 
-- Testing end-to-end del sistema completo
-- Validacion visual si aplica (playwright)
-- Confirmar que el problema ORIGINAL esta resuelto
-- Reportar al usuario que se construyo
+- End-to-end testing of the whole system
+- Visual validation if applicable (playwright)
+- Confirm the ORIGINAL problem is solved
+- Report to the user what was built, with the verification evidence
 
 ---
 
-## Errores Comunes
+## Common mistakes
 
-**Error 1: Generar todas las subtareas al inicio**
+**Mistake 1: generating every subtask up front**
 ```
-MAL:  Fase 1: DB Schema → 10 subtareas detalladas
-      Fase 2: APIs → 8 subtareas (basadas en SUPOSICIONES)
+BAD:  Phase 1: DB schema → 10 detailed subtasks
+      Phase 2: APIs → 8 subtasks (based on ASSUMPTIONS)
 
-BIEN: Fase 1: DB Schema (sin subtareas)
-      Fase 2: APIs (sin subtareas)
-      → Entrar en Fase 1 → MAPEAR contexto → GENERAR subtareas → Ejecutar
-      → Entrar en Fase 2 → MAPEAR contexto real → GENERAR subtareas
+GOOD: Phase 1: DB schema (no subtasks)
+      Phase 2: APIs (no subtasks)
+      → Enter Phase 1 → MAP context → GENERATE subtasks → execute
+      → Enter Phase 2 → MAP real context → GENERATE subtasks
 ```
 
-**Error 2: No re-mapear contexto entre fases**
+**Mistake 2: not re-mapping context between phases**
 ```
-MAL:  Fase 1 completada → Pasar directo a ejecutar Fase 2
-BIEN: Fase 1 completada → MAPEAR contexto de Fase 2 → Generar subtareas → Ejecutar
+BAD:  Phase 1 done → straight into executing Phase 2
+GOOD: Phase 1 done → MAP Phase 2 context → generate subtasks → execute
 ```
 
 ---
 
-## Checklist por Fase
+## Per-phase checklist
 
-Antes de marcar una fase como completada:
-- [ ] Todas las subtareas estan realmente terminadas?
-- [ ] La funcionalidad hace lo que se esperaba?
-- [ ] Hay errores documentados en auto-blindaje?
+Before marking a phase complete:
+- [ ] Are all subtasks really finished?
+- [ ] Does the functionality do what was expected (verified, not assumed)?
+- [ ] Are errors documented (self-hardening)?
 
-Antes de transicionar a siguiente fase:
-- [ ] Mapee el contexto actualizado?
-- [ ] Las subtareas de la nueva fase consideran lo que YA existe?
-
----
-
-## Principios BLUEPRINT
-
-1. Fases primero, subtareas despues — Solo generar subtareas cuando entras a la fase
-2. Mapeo obligatorio — Siempre mapear contexto real antes de generar subtareas
-3. TodoWrite activo — Mantener actualizado el progreso para visibilidad
-4. Validacion por fase — Confirmar que cada fase esta completa antes de avanzar
-5. Contexto acumulativo — Cada fase hereda el contexto de las anteriores
-6. Auto-blindaje — Cada error se documenta para no repetirse
+Before moving to the next phase:
+- [ ] Did I map the updated context?
+- [ ] Do the new subtasks account for what ALREADY exists?
 
 ---
 
-*"La precision viene de mapear la realidad, no de imaginar el futuro."*
-*"El sistema que se blinda solo es invencible."*
+## BLUEPRINT principles
+
+1. Phases first, subtasks later — only generate subtasks when entering the phase
+2. Mandatory mapping — always map the real context before generating subtasks
+3. Live todo list — keep progress visible
+4. Validation per phase — confirm each phase is complete before moving on
+5. Cumulative context — each phase inherits the previous ones' context
+6. Self-hardening — every error is documented so it doesn't repeat
+
+---
+
+*"Precision comes from mapping reality, not imagining the future."*
+*"A system that hardens itself keeps getting harder to break."*

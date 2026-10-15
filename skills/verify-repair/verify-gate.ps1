@@ -1,28 +1,28 @@
 <#
 .SYNOPSIS
   verify-gate.ps1 — Veredicto OBJETIVO de completitud de tarea.
-  Núcleo del harness Jarvis-UPLIFT (F1). Porta el patrón anti-gaming de evolve-loop.
+  Core of the Jarvis harness. Ports the anti-gaming pattern of evolve-loop.
 
 .DESCRIPTION
-  Una tarea no está hecha porque el modelo lo diga, sino porque los checks pasan.
-  Auto-detecta el tipo de proyecto, corre los checks aplicables (build/parse,
-  typecheck, lint, test, behavior), y escribe .verify/verdict.json ligado a un
-  stateHash (sha256 del estado del árbol). Exit 0 solo si TODO lo aplicable pasa.
+  A task is not done because the model says so, but because the checks pass.
+  Auto-detects the project type, runs the applicable checks (build/parse,
+  typecheck, lint, test, behaviour) and writes .verify/verdict.json bound to a
+  stateHash (sha256 of the tree). Exit 0 only if EVERYTHING applicable passes.
 
 .PARAMETER Path
-  Directorio del proyecto a verificar. Default: directorio actual.
+  Project directory to verify. Default: current directory.
 
 .PARAMETER Verifier
-  Comando verificador específico de caso (ej. "node verify.js"). Opcional.
+  Case-specific verifier command (e.g. "node verify.js"). Optional.
 
 .PARAMETER MustContain
-  Patrón que DEBE existir en -File (behavior check positivo). Opcional.
+  Pattern that MUST exist in -File (positive behaviour check). Optional.
 
 .PARAMETER MustNotContain
-  Patrón que NO debe existir en -File (behavior check negativo). Opcional.
+  Pattern that must NOT exist in -File (negative behaviour check). Optional.
 
 .PARAMETER File
-  Archivo objetivo para -MustContain / -MustNotContain.
+  Target file for -MustContain / -MustNotContain.
 
 .EXAMPLE
   pwsh verify-gate.ps1 -Path .
@@ -30,7 +30,7 @@
   pwsh verify-gate.ps1 -Path . -MustContain "dayPhase" -File "zombieswar.html"
 
 .OUTPUTS
-  Exit 0 = pass (+ .verify/verdict.json).  Exit 1 = fail.  Exit 2 = error de setup.
+  Exit 0 = pass (+ .verify/verdict.json).  Exit 1 = fail.  Exit 2 = setup error.
 #>
 param(
   [string]$Path = ".",
@@ -42,7 +42,7 @@ param(
 
 $ErrorActionPreference = "Continue"
 $root = Resolve-Path $Path -ErrorAction SilentlyContinue
-if (-not $root) { Write-Host "[gate] ruta no existe: $Path" -ForegroundColor Red; exit 2 }
+if (-not $root) { Write-Host "[gate] path does not exist: $Path" -ForegroundColor Red; exit 2 }
 Set-Location $root
 
 $checks = @()          # cada check: @{ name; status; detail }
@@ -56,7 +56,7 @@ function Have($cmd) { [bool](Get-Command $cmd -ErrorAction SilentlyContinue) }
 
 Write-Host ">>> verify-gate :: $root" -ForegroundColor Cyan
 
-# ── Detección de tipo de proyecto ───────────────────────────────────────────
+# ── Project type detection ───────────────────────────────────────────
 $hasNode   = Test-Path (Join-Path $root "package.json")
 $hasPy     = (Test-Path (Join-Path $root "requirements.txt")) -or (Test-Path (Join-Path $root "pyproject.toml")) -or @(Get-ChildItem $root -Filter *.py -ErrorAction SilentlyContinue).Count -gt 0
 $htmlFiles = @(Get-ChildItem $root -Filter *.html -ErrorAction SilentlyContinue)
@@ -70,13 +70,13 @@ if ($hasNode) {
     Add-Check "build" ($LASTEXITCODE -eq 0) "npm run build"
   }
 }
-# Parse de JS sueltos (sintaxis válida) via node --check
+# Parse loose JS files (valid syntax) via node --check
 if ($jsFiles.Count -gt 0 -and (Have node)) {
   $bad = @()
   foreach ($f in $jsFiles) { & node --check $f.FullName 2>$null; if ($LASTEXITCODE -ne 0) { $bad += $f.Name } }
-  Add-Check "parse-js" ($bad.Count -eq 0) $(if ($bad.Count) {"sintaxis inválida: $($bad -join ', ')"} else {"$($jsFiles.Count) archivos JS OK"})
+  Add-Check "parse-js" ($bad.Count -eq 0) $(if ($bad.Count) {"invalid syntax: $($bad -join ', ')"} else {"$($jsFiles.Count) JS files OK"})
 }
-# Parse de HTML embebido: extraer <script> y validar via node (heurística para juegos HTML)
+# Parse inline HTML scripts: extract <script> and validate with node
 if ($htmlFiles.Count -gt 0 -and (Have node)) {
   $bad = @()
   foreach ($h in $htmlFiles) {
@@ -95,13 +95,13 @@ if ($htmlFiles.Count -gt 0 -and (Have node)) {
       $i++
     }
   }
-  Add-Check "parse-html-js" ($bad.Count -eq 0) $(if ($bad.Count) {"JS embebido inválido: $($bad -join ', ')"} else {"$($htmlFiles.Count) HTML con JS válido"})
+  Add-Check "parse-html-js" ($bad.Count -eq 0) $(if ($bad.Count) {"invalid inline JS: $($bad -join ', ')"} else {"$($htmlFiles.Count) HTML with valid JS"})
 }
 if ($hasPy -and (Have python)) {
   $pyFiles = @(Get-ChildItem $root -Filter *.py -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch 'node_modules|\.venv|venv|__pycache__' })
   $bad = @()
   foreach ($f in $pyFiles) { & python -m py_compile $f.FullName 2>$null; if ($LASTEXITCODE -ne 0) { $bad += $f.Name } }
-  if ($pyFiles.Count -gt 0) { Add-Check "parse-py" ($bad.Count -eq 0) $(if ($bad.Count) {"sintaxis inválida: $($bad -join ', ')"} else {"$($pyFiles.Count) archivos .py OK"}) }
+  if ($pyFiles.Count -gt 0) { Add-Check "parse-py" ($bad.Count -eq 0) $(if ($bad.Count) {"invalid syntax: $($bad -join ', ')"} else {"$($pyFiles.Count) .py files OK"}) }
 }
 
 # ── 2. TYPECHECK ────────────────────────────────────────────────────────────
@@ -135,7 +135,7 @@ if ($hasPy -and (Have python)) {
   }
 }
 
-# ── 5. VERIFIER específico de caso ──────────────────────────────────────────
+# ── 5. Case-specific VERIFIER ──────────────────────────────────────────
 if ($Verifier) {
   $o = Invoke-Expression $Verifier 2>&1 | Out-String
   # acepta verificadores que devuelven exit code, o JSON con score
@@ -146,19 +146,19 @@ if ($Verifier) {
   Add-Check "verifier" $ok "$Verifier $(if($null -ne $score){"(score=$score)"})"
 }
 
-# ── 6. BEHAVIOR checks (grep de patrón) ─────────────────────────────────────
+# ── 6. BEHAVIOUR checks (pattern grep) ─────────────────────────────────────
 if ($MustContain -and $File) {
   $fp = Join-Path $root $File
   $found = (Test-Path $fp) -and (Select-String -Path $fp -Pattern $MustContain -Quiet -SimpleMatch)
-  Add-Check "must-contain" $found "'$MustContain' en $File"
+  Add-Check "must-contain" $found "'$MustContain' in $File"
 }
 if ($MustNotContain -and $File) {
   $fp = Join-Path $root $File
   $absent = (-not (Test-Path $fp)) -or (-not (Select-String -Path $fp -Pattern $MustNotContain -Quiet -SimpleMatch))
-  Add-Check "must-not-contain" $absent "'$MustNotContain' ausente de $File"
+  Add-Check "must-not-contain" $absent "'$MustNotContain' absent from $File"
 }
 
-# ── stateHash: sha256 del estado del árbol (anti-gaming) ─────────────────────
+# ── stateHash: sha256 of the tree (anti-gaming) ─────────────────────
 function Get-StateHash($dir) {
   $files = Get-ChildItem $dir -Recurse -File -ErrorAction SilentlyContinue |
     Where-Object { $_.FullName -notmatch 'node_modules|\.git|\.verify|__pycache__|\.venv|\.swarm|\.hive-mind|\.index$|\.db$|\.lock$' } |
@@ -185,20 +185,20 @@ $result = [ordered]@{
   stateHash = $stateHash
   timestamp = (Get-Date -Format "o")
   checks    = $checks
-  note      = "Veredicto objetivo. El modelo no puede escribir este archivo a mano."
+  note      = "Objective verdict. The model must not write this file by hand."
 }
 $result | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $verifyDir "verdict.json") -Encoding UTF8
 
 Write-Host ""
 if ($verdict -eq "pass") {
-  Write-Host "=== VEREDICTO: PASS ($($checks.Count) checks) ===" -ForegroundColor Green
+  Write-Host "=== VERDICT: PASS ($($checks.Count) checks) ===" -ForegroundColor Green
   exit 0
 } elseif ($verdict -eq "no-checks") {
-  Write-Host "=== VEREDICTO: SIN CHECKS APLICABLES — no se puede atestar ===" -ForegroundColor Yellow
-  Write-Host "    Especifique -Verifier o -MustContain para una tarea sin build/test." -ForegroundColor Yellow
+  Write-Host "=== VERDICT: NO APPLICABLE CHECKS — cannot attest ===" -ForegroundColor Yellow
+  Write-Host "    Pass -Verifier or -MustContain for a task without build/test." -ForegroundColor Yellow
   exit 1
 } else {
-  Write-Host "=== VEREDICTO: FAIL ($($failed.Count)/$($checks.Count) checks) ===" -ForegroundColor Red
-  Write-Host "    Fallaron: $(($failed | ForEach-Object { $_.name }) -join ', ')" -ForegroundColor Red
+  Write-Host "=== VERDICT: FAIL ($($failed.Count)/$($checks.Count) checks) ===" -ForegroundColor Red
+  Write-Host "    Failed: $(($failed | ForEach-Object { $_.name }) -join ', ')" -ForegroundColor Red
   exit 1
 }

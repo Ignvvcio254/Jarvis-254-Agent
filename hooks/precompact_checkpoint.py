@@ -96,19 +96,19 @@ def main():
         pedidos, archivos, todos = resumir(transcript)
         if not pedidos and not archivos:
             return 0
-        md = [f"# Checkpoint previo a compactar ({ev.get('trigger', '?')})",
-              f"- sesión: {str(ev.get('session_id', ''))[:8]} · {time.strftime('%Y-%m-%d %H:%M')} · cwd: {cwd}"]
+        md = [f"# Checkpoint before compaction ({ev.get('trigger', '?')})",
+              f"- session: {str(ev.get('session_id', ''))[:8]} · {time.strftime('%Y-%m-%d %H:%M')} · cwd: {cwd}"]
         rama = rama_git(cwd)
         if rama:
-            md.append(f"- rama git: {rama}")
+            md.append(f"- git branch: {rama}")
         if pedidos:
-            md.append("\n## Últimos pedidos del usuario (más reciente al final)")
+            md.append("\n## Latest user requests (most recent last)")
             md += [f"{i + 1}. {p}" for i, p in enumerate(pedidos)]
         if archivos:
-            md.append("\n## Archivos escritos/editados en la sesión (recientes primero)")
+            md.append("\n## Files written/edited this session (most recent first)")
             md += [f"- {a}" for a in archivos]
         if todos:
-            md.append("\n## Lista de tareas al compactar")
+            md.append("\n## Task list at compaction")
             md += [f"- [{(t.get('status') or '?')}] {t.get('content', '')}" for t in todos if isinstance(t, dict)]
         DIR.mkdir(parents=True, exist_ok=True)
         (DIR / f"{hash_cwd(cwd)}.md").write_text("\n".join(md) + "\n", encoding="utf-8")
