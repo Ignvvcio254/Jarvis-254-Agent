@@ -34,3 +34,12 @@ def test_install_merges_hooks_without_clobbering(tmp_path):
 def test_dry_run_writes_nothing(tmp_path):
     run(tmp_path, "--dry-run")
     assert not any(tmp_path.iterdir())
+
+
+def test_name_fills_placeholder_only_on_fresh_install(tmp_path):
+    run(tmp_path, "--name", "Ada", "--no-hooks")
+    text = (tmp_path / "CLAUDE.md").read_text(encoding="utf-8")
+    assert "{{YOUR_NAME}}" not in text and "Ada" in text
+    (tmp_path / "CLAUDE.md").write_text("mine", encoding="utf-8")
+    run(tmp_path, "--name", "Other", "--no-hooks")
+    assert (tmp_path / "CLAUDE.md").read_text(encoding="utf-8") == "mine"

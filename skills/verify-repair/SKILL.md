@@ -56,7 +56,16 @@ aplicables explicando por qué (nunca en silencio):
 Regla: **usar el entrypoint existente del proyecto** (`npm test`, `pytest`, etc.).
 No inventar comandos. Reportar SOLO resultados reales de ejecución.
 
-## El motor: verify-gate.ps1
+## El motor: verify_gate.py (multiplataforma) / verify-gate.ps1
+
+`verify_gate.py` es el port en Python, idéntico en checks y en `.verify/verdict.json`; corre en
+Windows, macOS y Linux sin PowerShell:
+
+```bash
+python ~/.claude/skills/verify-repair/verify_gate.py --path .
+python ~/.claude/skills/verify-repair/verify_gate.py --path . --verifier "node verify.js"
+python ~/.claude/skills/verify-repair/verify_gate.py --path . --must-contain dayPhase --file game.html
+```
 
 `verify-gate.ps1` automatiza el veredicto objetivo:
 - Auto-detecta tipo de proyecto (node / python / web-estático / genérico)

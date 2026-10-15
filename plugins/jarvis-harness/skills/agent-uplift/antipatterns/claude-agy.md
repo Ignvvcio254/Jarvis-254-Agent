@@ -1,0 +1,5 @@
+# Anti-patrones · Claude Sonnet/Opus vía AGY (-p headless)
+
+- [2026-06-09] · Omite puntos de specs multi-punto sin avisar (T-301: 5/6) · priorización implícita en tareas largas · **CONTRAMEDIDA:** "Antes de dar por terminada la tarea, relee los puntos 1..N de la spec y verifica que CADA UNO tiene código escrito. Si omites alguno, dilo explícitamente en el resumen."
+- [2026-06-09] · Sale de -p con exit 0 tras solo LEER (responde plan, no ejecuta; 3 veces seguidas en T-304) · el modo print acepta una respuesta de texto como final · **CONTRAMEDIDA (prefijo obligatorio):** "INSTRUCCIÓN DE EJECUCIÓN: esta tarea se completa ÚNICAMENTE escribiendo código con tus herramientas de edición. No describas planes. Lee lo mínimo y edita de inmediato." + check `edited` en runner.
+- [2026-06-10] · Degradación silenciosa por cuota de línea de modelo (exit 0 rápido, brain/ sin actividad) · cuotas separadas por línea · **CONTRAMEDIDA:** cambiar de línea en settings.json (Sonnet→Opus lo resolvió); smoke test antes de fases críticas.

@@ -48,33 +48,48 @@ It takes the best patterns from the open-source community — NousResearch/herme
 
 ## ⚡ Quick Start
 
+Pick one — all three are idempotent and **never overwrite your existing config**.
+
+**A. Claude Code plugin** (harness only: core skills, 9 subagents, autopilot hooks)
+```
+/plugin install jarvis-harness --marketplace Ignvvcio254/Jarvis-254-Agent
+```
+(Older Claude Code: `/plugin marketplace add Ignvvcio254/Jarvis-254-Agent` then `/plugin install jarvis-harness@jarvis-254`.)
+
+**B. One line — everything** (1400+ skills, rules, memory wiki, hooks, multi-model gateway)
 ```bash
-# 1. Clone
-git clone https://github.com/Ignvvcio254/Jarvis-254-Agent.git
-cd Jarvis-254-Agent
-
-# 2. Install skills, agents, hooks and the multi-model gateway (merges, never overwrites)
-python install.py            # --dry-run to preview
-
-# 3. Diagnose your setup instantly
-python jarvis_doctor.py --repo-only
-
-# 4. Plan your first task
-python jarvis_runtime.py plan --intent "build a REST API with FastAPI"
-
-# 5. Search your memory wiki (FTS5 BM25 — zero deps)
-python jarvis_runtime.py memory search "authentication patterns"
+# macOS / Linux / WSL
+curl -fsSL https://raw.githubusercontent.com/Ignvvcio254/Jarvis-254-Agent/main/scripts/bootstrap.sh | sh
+```
+```powershell
+# Windows (PowerShell 7)
+irm https://raw.githubusercontent.com/Ignvvcio254/Jarvis-254-Agent/main/scripts/bootstrap.ps1 | iex
 ```
 
-> ✅ No npm. No Docker. No cloud account required.
+**C. Manual**
+```bash
+git clone https://github.com/Ignvvcio254/Jarvis-254-Agent.git && cd Jarvis-254-Agent
+python install.py --dry-run   # preview
+python install.py             # install (backs up settings.json, merges hooks)
+python jarvis_doctor.py       # health check
+```
+
+Then, in any project:
+```bash
+python ~/.claude/skills/verify-repair/verify_gate.py --path .   # objective verdict
+python jarvis_runtime.py plan --intent "build a REST API with FastAPI"
+```
+
+> ✅ Python 3.8+ and Git. Node 18+ only for the optional multi-model gateway. No Docker, no cloud account.
+> Works with Codex / OpenCode / Cursor too: they read [`AGENTS.md`](AGENTS.md).
 
 ---
 
-## 🆕 v0.2 — Harness, autopilot hooks & any model
+## 🆕 v0.3 — Harness, autopilot hooks & any model
 
 | | What you get | Docs |
 |---|---|---|
-| ✅ **Objective verdicts** | `verify-repair` + `verify-gate.ps1`: a task is done when checks pass, not when the model says so. A `Stop` hook blocks "done" on unverified code. | [harness](docs/harness.md) |
+| ✅ **Objective verdicts** | `verify-repair` + `verify_gate.py` (cross-platform): a task is done when checks pass, not when the model says so. A `Stop` hook blocks "done" on unverified code. | [harness](docs/harness.md) |
 | 🤖 **Autopilot hooks** | Session resume, task-archetype router, correction capture, destructive-action guard, pre-compaction checkpoint. | [harness](docs/harness.md) |
 | 💸 **Token economy** | `token-router` + `agent-uplift`: the cheapest model that can do the job, lifted with specs + verify-repair loops. | [harness](docs/harness.md) |
 | 🧩 **Any model in `/model`** | Local gateway: Claude untouched + NVIDIA NIM, Gemini, Groq, Mistral, Cerebras, xAI, OpenRouter, Ollama, and `auto/*` fallback chains. | [models](docs/models.md) |
@@ -336,21 +351,10 @@ python jarvis_runtime.py <command>
 
 See [`INSTALL.md`](INSTALL.md) for the full guide.
 
-<details>
-<summary><strong>📦 Quick install (3 commands)</strong></summary>
-
-```bash
-# Copy slash commands
-cp -r commands/* ~/.claude/commands/
-
-# Copy skills
-cp -r skills/* ~/.claude/skills/
-
-# Verify everything is correct
-python jarvis_doctor.py
-```
-
-</details>
+Three ways — plugin, one-line bootstrap or `python install.py` — see [Quick Start](#-quick-start).
+`install.py` copies skills/agents/commands/rules/hooks, installs the gateway profiles only if absent,
+backs up `~/.claude/settings.json` and **merges** the hooks (re-running it is safe). Uninstall a hook by deleting
+its entry in `settings.json`.
 
 <details>
 <summary><strong>🔧 Configure your CLAUDE.md</strong></summary>
@@ -372,6 +376,9 @@ Replace placeholders in `CLAUDE.md`:
 
 | Doc | Purpose |
 |---|---|
+| [`docs/harness.md`](docs/harness.md) | Verify-repair, autopilot hooks, subagents, doctrines |
+| [`docs/models.md`](docs/models.md) | Multi-model gateway: add any provider/model to `/model` |
+| [`AGENTS.md`](AGENTS.md) | Portable contract for Codex / OpenCode / Cursor / Gemini CLI |
 | [`docs/commands.md`](docs/commands.md) | All slash commands and their behavior |
 | [`docs/command-skill-matrix.md`](docs/command-skill-matrix.md) | Command → skill → workflow mapping |
 | [`docs/skills-guide.md`](docs/skills-guide.md) | How to navigate 1400+ skills |

@@ -1,0 +1,17 @@
+{
+  "name": "jarvis-254",
+  "owner": { "name": "Jarvis-254-Agent contributors" },
+  "metadata": {
+    "description": "Jarvis-254-Agent: an engineering co-pilot harness for Claude Code.",
+    "version": "0.3.0"
+  },
+  "plugins": [
+    {
+      "name": "jarvis-harness",
+      "source": "./plugins/jarvis-harness",
+      "description": "Objective verdicts (verify-repair), autopilot hooks, token routing, 9 subagents, subagent orchestration and self-improvement.",
+      "category": "development",
+      "keywords": ["harness", "verification", "hooks", "subagents", "orchestration"]
+    }
+  ]
+}

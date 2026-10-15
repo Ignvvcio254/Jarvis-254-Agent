@@ -15,7 +15,7 @@ const args = process.argv.slice(2);
 const opt = (n, d) => { const i = args.indexOf("--" + n); return i >= 0 && args[i + 1] && !args[i + 1].startsWith("--") ? args[i + 1] : d; };
 const PUERTO = process.env.MODELO_PROXY_PORT || 8787;
 const BASE = `http://127.0.0.1:${PUERTO}`;
-const token = fs.readFileSync(path.join(process.env.LOCALAPPDATA || "", "claude-gateway", "token"), "utf8").trim();
+const token = fs.readFileSync(path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), ".cache"), "claude-gateway", "token"), "utf8").trim();
 const perfil = JSON.parse(fs.readFileSync(path.join(os.homedir(), ".claude", "profiles", "multi.settings.json"), "utf8"));
 const TIMEOUT_MS = Number(opt("timeout", 90)) * 1000;
 

@@ -1,0 +1,75 @@
+{
+  "description": "Jarvis harness autopilot: session resume, archetype router, correction capture, destructive guard, pre-compact checkpoint, verdict guard",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 10,
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/run-py.sh\" \"${CLAUDE_PLUGIN_ROOT}/hooks/session_boot.py\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 10,
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/run-py.sh\" \"${CLAUDE_PLUGIN_ROOT}/hooks/archetype_router.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 10,
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/run-py.sh\" \"${CLAUDE_PLUGIN_ROOT}/hooks/correction_detector.py\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell|mcp__.*__(delete|buy|merge|sign|submit|cancel|terminate|reset|rollback).*",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 5,
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/run-py.sh\" \"${CLAUDE_PLUGIN_ROOT}/hooks/destructive_guard.py\""
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 15,
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/run-py.sh\" \"${CLAUDE_PLUGIN_ROOT}/hooks/precompact_checkpoint.py\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 10,
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/run-py.sh\" \"${CLAUDE_PLUGIN_ROOT}/hooks/verdict_guard.py\""
+          }
+        ]
+      }
+    ]
+  }
+}

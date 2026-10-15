@@ -246,7 +246,7 @@ Use this workflow when the task:
 
 ## 🗜️ CAVEMAN — Progressive compression modes
 
-Skill installed in `~/.claude/skills/caveman/`. Activate only with {{YOUR_NAME}}'s approval.
+Uses the community skill [caveman](https://github.com/JuliusBrussee/caveman) (install: `git clone https://github.com/JuliusBrussee/caveman ~/.claude/skills/caveman`). Activate only with {{YOUR_NAME}}'s approval.
 
 | Mode | Trigger | Reduction | Behavior |
 |------|---------|-----------|----------|

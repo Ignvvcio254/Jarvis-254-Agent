@@ -50,6 +50,13 @@ MAX_FILES = 20000  # backstop: no escanear árboles gigantes indefinidamente
 MAX_CHEAP_CHECKS = 25  # cota de verificaciones baratas por ejecución del hook
 
 
+_HERE = Path(__file__).resolve().parent
+STAMP = (_HERE / "verdict_stamp.py").as_posix()
+GATE = next((p.as_posix() for p in (_HERE.parent / "skills" / "verify-repair" / "verify_gate.py",
+                                     Path.home() / ".claude" / "skills" / "verify-repair" / "verify_gate.py")
+             if p.exists()), "~/.claude/skills/verify-repair/verify_gate.py")
+
+
 def read_event():
     try:
         return json.loads(sys.stdin.buffer.read().decode("utf-8", errors="replace") or "{}")
@@ -174,15 +181,15 @@ def main():
     elif vmtime is None:
         msg = (f"[verdict-guard] Editaste {rel} (no auto-verificable barato) y NO existe "
                f"`.verify/verdict.json`. Corre el veredicto objetivo antes de reportar: "
-               f"`pwsh ~/.claude/skills/verify-repair/verify-gate.ps1 -Path .`, o si ya "
-               f"verificaste con tsc/build, séllalo: `python ~/.claude/scripts/verdict_stamp.py tsc`.")
+               f"`python {GATE} --path .`, o si ya "
+               f"verificaste con tsc/build, séllalo: `python {STAMP} tsc`.")
     elif vmtime is False:
         msg = (f"[verdict-guard] El último veredicto NO es 'pass'. No reportes éxito: "
                f"repara y re-verifica antes de cerrar.")
     else:
         msg = (f"[verdict-guard] {rel} cambió después del último veredicto pass. "
                f"Si ya lo verificaste (tsc/build/deploy), séllalo: "
-               f"`python ~/.claude/scripts/verdict_stamp.py tsc`. Si no, corre verify-gate.")
+               f"`python {STAMP} tsc`. Si no, corre verify-gate.")
     emit(msg)
     sys.exit(0)
 

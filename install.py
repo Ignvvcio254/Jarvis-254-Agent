@@ -91,6 +91,7 @@ def main() -> int:
     ap.add_argument("--claude-dir", default=str(Path.home() / ".claude"))
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--no-hooks", action="store_true")
+    ap.add_argument("--name", default="", help="how Jarvis addresses you; fills {{YOUR_NAME}} in CLAUDE.md")
     a = ap.parse_args()
     home = Path(a.claude_dir).expanduser()
 
@@ -102,8 +103,13 @@ def main() -> int:
     claude_md = home / "CLAUDE.md"
     if not claude_md.exists():
         if not a.dry_run:
-            shutil.copy2(REPO / "CLAUDE.md", claude_md)
-        print("  + CLAUDE.md instalado (edite los {{PLACEHOLDERS}})")
+            text = (REPO / "CLAUDE.md").read_text(encoding="utf-8")
+            if a.name:
+                text = text.replace("{{YOUR_NAME}}", a.name)
+            claude_md.parent.mkdir(parents=True, exist_ok=True)
+            claude_md.write_text(text, encoding="utf-8")
+        hint = "" if a.name else " — tip: --name \"Ada\" fills {{YOUR_NAME}}"
+        print(f"  + CLAUDE.md instalado{hint}")
     else:
         print("  = CLAUDE.md ya existe: no se toca. Compare con el del repo y fusione a mano.")
 

@@ -1,191 +1,103 @@
-# Installation Guide — Jarvis 254 Agent
+# Installation — Jarvis-254-Agent
 
-## Objetivo
+> Everything here is **idempotent** and **non-destructive**: re-running is safe and your existing
+> `CLAUDE.md`, `settings.json`, `~/.claude.json` and model profiles are never overwritten.
 
-Instalar Jarvis de forma portable y segura, con comandos, memoria, skills y base SaaS System listos para operar.
+## Requirements
 
-## Requisitos
+| Tool | Needed for |
+|---|---|
+| [Claude Code](https://claude.com/claude-code) | Everything (other agents: see `AGENTS.md`) |
+| Python 3.8+ | Installer, hooks, verify gate, memory wiki (stdlib only) |
+| Git | Bootstrap / updates |
+| Node.js 18+ | Optional: multi-model gateway |
+| PowerShell 7 | Optional: `verify-gate.ps1`, `multi-cli` templates (Python equivalents exist) |
 
-- [Claude Code](https://claude.ai/code) instalado y autenticado
-- Node.js 18+
-- Python 3.11+
-- Git
+## Option A — Claude Code plugin (harness only)
 
-## 1) Clonar repositorio
+```
+/plugin install jarvis-harness --marketplace Ignvvcio254/Jarvis-254-Agent
+```
+Older Claude Code:
+```
+/plugin marketplace add Ignvvcio254/Jarvis-254-Agent
+/plugin install jarvis-harness@jarvis-254
+```
+Installs the core skills (verify-repair, token-router, scratchpad, agent-uplift, multi-cli,
+subagent-orchestration, long-run-harness, jarvis-evolve, prp, bucle-agentico), 9 subagents, the
+`/memoria`, `/consumo`, `/doctor` commands and the autopilot hooks. Update with `/plugin update`,
+remove with `/plugin uninstall jarvis-harness`.
+
+> Use A **or** B for hooks, not both, or each hook runs twice.
+
+## Option B — Everything, one line
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Ignvvcio254/Jarvis-254-Agent/main/scripts/bootstrap.sh | sh   # macOS/Linux/WSL
+```
+```powershell
+irm https://raw.githubusercontent.com/Ignvvcio254/Jarvis-254-Agent/main/scripts/bootstrap.ps1 | iex       # Windows
+```
+Clones to `~/.jarvis-254` (`JARVIS_HOME` to change it), runs `install.py` and `jarvis_doctor.py`.
+Run it again to update.
+
+## Option C — Manual
 
 ```bash
 git clone https://github.com/Ignvvcio254/Jarvis-254-Agent.git
 cd Jarvis-254-Agent
+python install.py --dry-run          # preview
+python install.py                    # install
+python install.py --no-hooks         # files only, settings.json untouched
+python install.py --claude-dir PATH  # another Claude config dir
 ```
 
-Validación del clon:
+What `install.py` does:
+
+| Source | Destination | Overwrites? |
+|---|---|---|
+| `skills/`, `agents/`, `commands/`, `rules/` | `~/.claude/...` | yes (repo files only; your other files stay) |
+| `hooks/*`, `models/*` | `~/.claude/scripts/` | yes |
+| `models/profiles/*.example.json` | `~/.claude/profiles/gateway.json`, `multi.settings.json` | **no** — only if absent |
+| `CLAUDE.md` | `~/.claude/CLAUDE.md` | **no** — only if absent |
+| hooks wiring | `~/.claude/settings.json` | **merged**, with a timestamped backup |
+
+## After installing
+
+1. **Personalize `~/.claude/CLAUDE.md`** — replace `{{YOUR_NAME}}`, `{{YOUR_OS}}`, `{{YOUR_SHELL}}`. If you
+   already had a `CLAUDE.md`, compare it with the repo's and merge the sections you want.
+2. **Memory wiki (optional)**
+   ```bash
+   mkdir -p ~/.claude/cerebro/sessions
+   cp -n cerebro/*.md cerebro/search.py ~/.claude/cerebro/
+   python ~/.claude/cerebro/search.py index
+   ```
+3. **MCP servers (optional)** — `mcp/mcp.template.json` lists recommended servers. **Merge** the entries you
+   want into the `mcpServers` of `~/.claude.json` (or use `claude mcp add`); never copy the template over it.
+   Keys go in environment variables (`mcp/env.example`).
+4. **More models (optional)** — see [`docs/models.md`](docs/models.md).
+
+## Verify
 
 ```bash
-python jarvis_doctor.py --repo-only
-python jarvis_runtime.py doctor --repo-only
+python jarvis_doctor.py                                         # installation health
+python ~/.claude/skills/verify-repair/verify_gate.py --path .   # objective verdict on a project
 ```
+In Claude Code, `/hooks` lists the installed hooks; a new session should show the `[session-boot]` context
+when a `.scratch/task.md` exists in the project.
 
-## 2) Instalar contrato principal (`CLAUDE.md`)
+## Uninstall
 
-```bash
-[ -f ~/.claude/CLAUDE.md ] && cp ~/.claude/CLAUDE.md ~/.claude/CLAUDE.md.backup
-cp CLAUDE.md ~/.claude/CLAUDE.md
-```
-
-Reemplazar placeholders en `~/.claude/CLAUDE.md`:
-
-- `{{YOUR_NAME}}`
-- `{{GITHUB_USERNAME}}`
-- `{{GITHUB_TOKEN}}` (solo local, opcional)
-
-## 3) Instalar skills
-
-```bash
-mkdir -p ~/.claude/skills
-cp -r skills/* ~/.claude/skills/
-```
-
-Validación rápida:
-
-```bash
-find ~/.claude/skills -maxdepth 2 -name SKILL.md | head
-```
-
-## 4) Inicializar memoria (`cerebro`)
-
-```bash
-mkdir -p ~/.claude/cerebro/sessions
-cp cerebro/index.md ~/.claude/cerebro/
-cp cerebro/log.md ~/.claude/cerebro/
-cp cerebro/sources.md ~/.claude/cerebro/
-cp cerebro/search.py ~/.claude/cerebro/
-```
-
-Validación:
-
-```bash
-cd ~/.claude/cerebro
-python search.py index
-python search.py stats
-```
-
-## 5) Instalar comandos slash
-
-```bash
-mkdir -p ~/.claude/commands
-cp commands/*.md ~/.claude/commands/
-```
-
-Comandos clave instalados:
-
-- `/memoria`
-- `/consumo`
-- `/ag-project`
-- `/marketing-swarm`
-- `/connect-apps-setup`
-
-## 6) Instalar base SaaS System (PRP)
-
-```bash
-mkdir -p ~/.claude/PRPs
-cp PRPs/prp-base.md ~/.claude/PRPs/
-```
-
-Esto habilita el flujo PRP + ejecución por fases.
-
-## 7) Configurar MCP (seguro)
-
-Opción A (plantillas MCP):
-
-```bash
-cp mcp/mcp.template.json ~/.claude.json
-cp mcp/env.example .env
-```
-
-Opción B (templates de config sanitizados):
-
-```bash
-cp config/settings.template.json ~/.claude/settings.json
-cp config/claude.template.json ~/.claude.json
-```
-
-Reglas:
-
-- Nunca commitear `.env`, tokens o credenciales reales.
-- Mantener rutas portables.
-
-## 8) (Opcional) Crear archivo de goals
-
-```bash
-cat > ~/.claude/goals.md << 'EOF'
-# Goals — Jarvis
-
-## Active
-
-*(sin goals activos — use /goal para agregar)*
-
-## Completed
-
-*(none)*
-EOF
-```
-
-## 9) Primera sesión
-
-Abrir Claude Code en cualquier proyecto. Jarvis cargará:
-
-1. `~/.claude/CLAUDE.md`
-2. `~/.claude/cerebro/index.md`
-3. `~/.claude/goals.md` (si existe)
-
-## Verificación funcional
-
-Probar en Claude Code:
-
-```text
-/goal Mi primer objetivo
-/goal list
-/snapshot create
-/insights
-/memoria lint
-/doctor
-```
-
-Verificación técnica local:
-
-```bash
-python jarvis_doctor.py
-python jarvis_runtime.py doctor
-python jarvis_runtime.py providers
-python jarvis_runtime.py plan --intent "fix login bug"
-```
-
-## 10) (Opcional) Actualizar referencia Hermes para benchmark
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\sync_hermes_upstream.ps1
-```
-
-Notas:
-
-- `upstream/` es opcional y está excluido de git.
-- Sirve para análisis comparativo y extracción de patrones, no para runtime obligatorio.
-
-## Verificación SaaS System
-
-```text
-/ag-project demo-saas fullstack
-/memoria query PRP
-```
-
-Y para features complejas:
-
-1. Generar PRP con `skills/prp/SKILL.md` + `PRPs/prp-base.md`.
-2. Ejecutar por fases con `skills/bucle-agentico/SKILL.md`.
+- Plugin: `/plugin uninstall jarvis-harness`.
+- Manual: restore the `settings.json.bak-*` backup (or delete the Jarvis hook entries) and remove the copied
+  folders you don't want.
 
 ## Troubleshooting
 
-- Skills no activan: verificar `~/.claude/skills/<skill>/SKILL.md`.
-- Fallo en cerebro: ejecutar `python ~/.claude/cerebro/search.py index`.
-- Error MCP: validar `node --version` y revisar `~/.claude.json`.
-- Comandos slash no aparecen: confirmar copia en `~/.claude/commands/`.
+| Symptom | Fix |
+|---|---|
+| Hooks never fire | `/hooks` in Claude Code; check Python is on PATH (`python --version` / `python3 --version`). On Windows, disable the Store `python3` alias if it is a stub. |
+| `verdict_guard` keeps asking for a verdict | Run `verify_gate.py --path .`; for tsc/build-only checks: `python ~/.claude/scripts/verdict_stamp.py tsc`. |
+| Gateway models error | Keys missing: `~/.claude/.env` or env vars; `node ~/.claude/scripts/salud-modelos.mjs`. |
+| Skills don't trigger | Confirm `~/.claude/skills/<name>/SKILL.md` exists; restart Claude Code. |
+| Memory search fails | `python ~/.claude/cerebro/search.py index`. |
