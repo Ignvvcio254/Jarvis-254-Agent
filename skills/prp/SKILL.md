@@ -28,7 +28,7 @@ Es el contrato humano-IA. El humano define el objetivo y el por qué. Jarvis inv
 
 Lee el template en:
 ```
-C:/Users/w10/.claude/PRPs/prp-base.md
+~/.claude/PRPs/prp-base.md
 ```
 
 ### Paso 2: Entrevistar si falta contexto

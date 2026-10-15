@@ -21,7 +21,7 @@ Orquesta un análisis o tarea de marketing completa distribuyéndola entre 7 wor
 - Análisis de marketing completo de un producto (audit 360°)
 - Lanzamiento de producto/servicio (todos los frentes en paralelo)
 - Sprint de marketing intensivo (ejecutar múltiples dominios a la vez)
-- Cuando el señor Ignacio necesite cobertura total sin trabajar secuencialmente
+- Cuando el usuario necesite cobertura total sin trabajar secuencialmente
 
 ## Cómo invocar
 
@@ -44,10 +44,10 @@ Antes de lanzar el swarm, Jarvis recopila:
 ```
 PRODUCT_CONTEXT = [ruta al archivo .md o descripción inline]
 SWARM_OBJECTIVE = [objetivo específico del análisis/tarea]
-HORMOZI_FILE = C:/Users/w10/Downloads/HORMOZI-MAESTRO-MARKETING.md
+HORMOZI_FILE = ~/Downloads/HORMOZI-MAESTRO-MARKETING.md
 ```
 
-Si el señor Ignacio tiene un `.agents/product-marketing-context.md` en el proyecto activo, leerlo automáticamente como PRODUCT_CONTEXT.
+Si el usuario tiene un `.agents/product-marketing-context.md` en el proyecto activo, leerlo automáticamente como PRODUCT_CONTEXT.
 
 ---
 

@@ -28,7 +28,7 @@ Coordinar trabajo entre Jarvis (Claude Code) y los agentes de Antigravity IDE y 
 | **Claude Sonnet 4.6** | Code review, código de precisión media |
 | **Claude Opus 4.6** | Análisis de codebase grande, documentación extensa |
 
-### GitHub Copilot CLI (cuenta Ignvvcio254 — sin API key adicional)
+### GitHub Copilot CLI (sin API key adicional)
 | Modelo | Cuándo delegar |
 |---|---|
 | `claude-opus-4.5` | Tareas CLI complejas, debugging profundo, arquitectura |

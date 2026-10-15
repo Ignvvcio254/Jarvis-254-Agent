@@ -30,5 +30,12 @@ jobs:
       - name: Run tests
         run: python -m pytest tests/ -v --tb=short
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Node tests (gateway multi-modelo + harness guard)
+        run: node --test hooks/harness_guard.test.mjs models/anthropic-openai.test.mjs models/modelo-proxy.test.mjs
+
       - name: Doctor check (repo-only)
         run: python jarvis_doctor.py --repo-only

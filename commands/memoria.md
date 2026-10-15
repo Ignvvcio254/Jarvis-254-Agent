@@ -6,7 +6,7 @@ argument-hint: "[ingest | query <pregunta> | lint]"
 # /memoria
 
 Sos el operador del wiki de Jarvis — Sistema Global. El wiki es un knowledge base markdown vivo
-en `cerebro/` dentro de `C:/Users/w10/.claude/`. **Antes de hacer nada, leé `C:/Users/w10/.claude/cerebro/CLAUDE.md` completo** — ese archivo
+en `cerebro/` dentro de `~/.claude/`. **Antes de hacer nada, leé `~/.claude/cerebro/CLAUDE.md` completo** — ese archivo
 es tu manual operativo con todas las reglas de frontmatter, wikilinks, y operaciones.
 
 ---
@@ -23,10 +23,10 @@ Parseá `$ARGUMENTS`:
 
 ## Modo INGEST
 
-Objetivo: crear (o actualizar) un nodo de sesión en `C:/Users/w10/.claude/cerebro/sessions/` que capture
+Objetivo: crear (o actualizar) un nodo de sesión en `~/.claude/cerebro/sessions/` que capture
 lo que pasó en ESTA conversación.
 
-1. Leé `C:/Users/w10/.claude/cerebro/CLAUDE.md` y `C:/Users/w10/.claude/cerebro/index.md`.
+1. Leé `~/.claude/cerebro/CLAUDE.md` y `~/.claude/cerebro/index.md`.
 2. Revisá la conversación actual (todos los turnos previos). Identificá:
    - Área(s) tocadas.
    - Verbo de acción principal (definimos, migramos, decidimos, implementamos, debuggeamos).
@@ -39,16 +39,16 @@ lo que pasó en ESTA conversación.
    - **Sí** → UPDATE: leelo y appendeá a Decisions/Output/Pending bajo un sub-bloque
      `### Update [HH:MM]`. No reescribas lo anterior.
    - **No** → CREATE.
-5. CREATE: generá frontmatter completo siguiendo las reglas de `C:/Users/w10/.claude/cerebro/CLAUDE.md`.
-   - `related`: buscá en `C:/Users/w10/.claude/cerebro/index.md` nodos con tags solapados, misma área o
+5. CREATE: generá frontmatter completo siguiendo las reglas de `~/.claude/cerebro/CLAUDE.md`.
+   - `related`: buscá en `~/.claude/cerebro/index.md` nodos con tags solapados, misma área o
      proximidad cronológica. Máx. 5.
    - `sources`: paths de archivos de Jarvis tocados con prefijo `repo:`, URLs externas con prefijo `url:`.
 6. Escribí el cuerpo con las 6 secciones obligatorias. En Cross-refs usá `[[slug]]` con razón en una línea.
 7. **Bidireccionalidad obligatoria**: para cada nodo en `related`, abrilo y agregá un
    bullet recíproco en su sección `## Cross-refs`: `[[este-nodo]] — razón`. Sin excepciones.
-8. Actualizá `C:/Users/w10/.claude/cerebro/index.md`: insertá el bullet `[[slug]] — one-liner` al tope de la
+8. Actualizá `~/.claude/cerebro/index.md`: insertá el bullet `[[slug]] — one-liner` al tope de la
    sección del área correspondiente. Si el área no existe, creala en orden alfabético.
-9. Append a `C:/Users/w10/.claude/cerebro/log.md`:
+9. Append a `~/.claude/cerebro/log.md`:
    ```
    ## [YYYY-MM-DD HH:MM] ingest | <slug>
    - Área: <area>
@@ -63,7 +63,7 @@ lo que pasó en ESTA conversación.
 
 Objetivo: responder una pregunta usando el wiki como base, con citations verificables.
 
-1. Leé `C:/Users/w10/.claude/cerebro/CLAUDE.md` y `C:/Users/w10/.claude/cerebro/index.md` completos.
+1. Leé `~/.claude/cerebro/CLAUDE.md` y `~/.claude/cerebro/index.md` completos.
 2. De los one-liners del índice, seleccioná 1-5 nodos candidatos para la pregunta.
    Si ninguno parece relevante, decilo y sugerí ampliar la búsqueda.
 3. Leé esos nodos completos.
@@ -82,8 +82,8 @@ Objetivo: responder una pregunta usando el wiki como base, con citations verific
 
 Objetivo: reportar el estado de salud del wiki **SIN modificar archivos**.
 
-1. Leé `C:/Users/w10/.claude/cerebro/CLAUDE.md`, `C:/Users/w10/.claude/cerebro/index.md` y **todos** los archivos en `C:/Users/w10/.claude/cerebro/sessions/`.
-2. Revisá cada categoría según las reglas de lint de `C:/Users/w10/.claude/cerebro/CLAUDE.md`.
+1. Leé `~/.claude/cerebro/CLAUDE.md`, `~/.claude/cerebro/index.md` y **todos** los archivos en `~/.claude/cerebro/sessions/`.
+2. Revisá cada categoría según las reglas de lint de `~/.claude/cerebro/CLAUDE.md`.
 3. Devolvé un reporte markdown estructurado:
 
    ```markdown
@@ -109,7 +109,7 @@ Objetivo: reportar el estado de salud del wiki **SIN modificar archivos**.
    ```
 
 4. **NO modificar archivos.**
-5. Append a `C:/Users/w10/.claude/cerebro/log.md`:
+5. Append a `~/.claude/cerebro/log.md`:
    ```
    ## [YYYY-MM-DD HH:MM] lint | report
    - Críticos: N | Medios: N | Oportunidades: N

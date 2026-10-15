@@ -1,6 +1,6 @@
 ---
 name: goal
-description: "Objetivos persistentes que guían el comportamiento del agente entre sesiones. Activar con: /goal <objetivo>, /goal list, /goal clear <id>, /goal done <id> — o cuando el señor Ignacio diga 'quiero que recuerdes que...', 'mi objetivo es...', 'que no se te olvide que...'. Los goals persisten en ~/.claude/goals.md entre conversaciones."
+description: "Objetivos persistentes que guían el comportamiento del agente entre sesiones. Activar con: /goal <objetivo>, /goal list, /goal clear <id>, /goal done <id> — o cuando el usuario diga 'quiero que recuerdes que...', 'mi objetivo es...', 'que no se te olvide que...'. Los goals persisten en ~/.claude/goals.md entre conversaciones."
 allowed-tools: Read, Write, Edit, Glob
 ---
 
@@ -16,7 +16,7 @@ allowed-tools: Read, Write, Edit, Glob
 Un **goal** es un objetivo que:
 1. Persiste entre sesiones en `~/.claude/goals.md`
 2. Se carga al inicio de cada sesión junto con `cerebro/index.md`
-3. Orienta las decisiones del agente sin que el señor Ignacio deba repetirlo
+3. Orienta las decisiones del agente sin que el usuario deba repetirlo
 4. Tiene estados: `active` / `paused` / `done` / `cleared`
 
 **Diferencia con memoria:**
@@ -119,14 +119,14 @@ Un **goal** es un objetivo que:
 ## Ejemplo de uso
 
 ```
-señor Ignacio: /goal Jarvis al 85% de capacidad autónoma para junio 2026
+usuario: /goal Jarvis al 85% de capacidad autónoma para junio 2026
 
 Jarvis: ✅ Goal registrado (goal-001):
         🎯 "Jarvis al 85% autonomous — deadline: 2026-06-30"
         Lo cargo automáticamente en cada sesión y oriento los sprints hacia él.
 ```
 
-En la siguiente sesión, sin que el señor Ignacio lo repita:
+En la siguiente sesión, sin que el usuario lo repita:
 ```
 Jarvis: 🎯 Goal activo: "Jarvis al 85% autonomous — 55 días restantes"
         Sprint de hoy avanza hacia: FTS5 cerebro + gateway unificado (+7%)

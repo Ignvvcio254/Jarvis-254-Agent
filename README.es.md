@@ -343,7 +343,7 @@ python jarvis_doctor.py
 Reemplazar los placeholders en `CLAUDE.md`:
 
 ```
-{{YOUR_NAME}}        → tu nombre (ej. "Ignacio")
+{{YOUR_NAME}}        → tu nombre (ej. "Ada")
 {{YOUR_REPO}}        → ruta de tu repo principal
 {{YOUR_SHELL}}       → bash / zsh / powershell
 {{YOUR_OS}}          → Windows / macOS / Linux

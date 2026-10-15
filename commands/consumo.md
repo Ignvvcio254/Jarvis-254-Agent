@@ -1,5 +1,5 @@
 ---
-description: Reporte de consumo estimado de tokens en la sesión actual. Propone modo Caveman si el señor Ignacio lo aprueba.
+description: Reporte de consumo estimado de tokens en la sesión actual. Propone modo Caveman si el usuario lo aprueba.
 argument-hint: "[status | lite | full | ultra | off]"
 ---
 
@@ -68,15 +68,15 @@ Modo activo: [Jarvis Normal | Caveman Lite | Caveman Full | Caveman Ultra]
 
 [SI restante < 55%]:
 ⚠️  Recomendación: activar `/caveman lite` para reducir ~40% en respuestas.
-¿Lo activo, señor Ignacio?
+¿Lo activo, usuario?
 
 [SI restante < 35%]:
 🔶 Recomendación: activar `/caveman full` — compresión significativa necesaria.
-¿Lo activo, señor Ignacio?
+¿Lo activo, usuario?
 
 [SI restante < 20%]:
 🔴 Recomendación: activar `/caveman ultra` — presupuesto crítico.
-¿Lo activo, señor Ignacio?
+¿Lo activo, usuario?
 
 [SI restante > 55%]:
 ✅ Consumo dentro de parámetros normales. Sin acción necesaria.
@@ -86,22 +86,22 @@ Modo activo: [Jarvis Normal | Caveman Lite | Caveman Full | Caveman Ultra]
 
 ## Activación de modo Caveman
 
-Si el señor Ignacio aprueba una recomendación o envía `$ARGUMENTS` con un modo:
+Si el usuario aprueba una recomendación o envía `$ARGUMENTS` con un modo:
 
 ### Lite
 Responder de forma profesional y compacta. Eliminar frases de relleno, mantener gramática. Reducción estimada: ~25-35%.
-- Mantener: cortesía con "señor Ignacio", respuestas en Discord + TTS
+- Mantener: cortesía con "usuario", respuestas en Discord + TTS
 - Eliminar: frases introductorias innecesarias, verbosidad
 
 ### Full
 Fragmentos cortos, sin artículos innecesarios, sinónimos cortos. Reducción estimada: ~50-60%.
-- Mantener: información técnica completa, "señor Ignacio"
+- Mantener: información técnica completa, "usuario"
 - Eliminar: todo lo que no sea esencial al mensaje
 
 ### Ultra
 Máxima compresión. Abreviaturas, flechas para causalidad. Reducción estimada: ~70-75%.
 - Solo para sesiones críticas por presupuesto
-- Mantener: "señor Ignacio", precisión técnica core
+- Mantener: "usuario", precisión técnica core
 - Eliminar: casi todo lo decorativo
 
 ### Off
@@ -113,6 +113,6 @@ Volver a Jarvis comportamiento normal completo.
 
 Jarvis monitorea activamente. Si detecta señales de sesión pesada (40+ mensajes, muchos archivos, herramientas intensivas), propone proactivamente:
 
-> "Señor Ignacio, llevamos una sesión larga. Estimación: ~55% de presupuesto restante. ¿Activo caveman lite para optimizar el resto?"
+> "llevamos una sesión larga. Estimación: ~55% de presupuesto restante. ¿Activo caveman lite para optimizar el resto?"
 
-El señor Ignacio decide. Jarvis no activa sin aprobación.
+El usuario decide. Jarvis no activa sin aprobación.

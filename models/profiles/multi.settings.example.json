@@ -1,0 +1,92 @@
+{
+  "_doc": "Perfil del gateway local (claude-multi.ps1). AGREGA modelos al selector sin reemplazar ni remapear los Claude (replaceBuiltInOptions=false, sin ANTHROPIC_DEFAULT_*). Los Claude pasan al proxy y de ahí a Anthropic con su suscripción. Config de proveedores y cadenas: gateway.json. ENABLE_TOOL_SEARCH=true (medido 2026-10-03): con un ANTHROPIC_BASE_URL no oficial Claude Code lo apaga y cargaba TODAS las herramientas MCP por adelantado (55 en la prueba, 0 diferidas); con la variable llegan 15 (-73 %), el uso real de la herramienta MCP funciona igual con Claude (passthrough) y con Nemotron (traductor).",
+  "env": {
+    "CLAUDE_CODE_DISABLE_UNKNOWN_MODEL_WINDOW_ENFORCEMENT": "1",
+    "ENABLE_TOOL_SEARCH": "true"
+  },
+  "modelPicker": {
+    "replaceBuiltInOptions": false,
+    "options": [
+      {
+        "model": "auto/barato",
+        "label": "Auto · barato",
+        "description": "Cadena con respaldo: GLM Flash → DeepSeek Flash → Gemini Lite · gratis"
+      },
+      {
+        "model": "auto/potente",
+        "label": "Auto · potente",
+        "description": "Cadena con respaldo: GLM 5.3 → Kimi K3 → Nemotron Ultra → Gemini Pro · gratis"
+      },
+      {
+        "model": "auto/codigo",
+        "label": "Auto · código",
+        "description": "Cadena con respaldo: Codestral → GLM 5.3 → Gemini Flash · gratis"
+      },
+      {
+        "model": "nim/z-ai/glm-5.3",
+        "label": "GLM 5.3 (NIM)",
+        "description": "Z.ai vía NVIDIA · gratis · código y agentes"
+      },
+      {
+        "model": "nim/moonshotai/kimi-k3",
+        "label": "Kimi K3 (NIM)",
+        "description": "Moonshot vía NVIDIA · gratis"
+      },
+      {
+        "model": "nim/nvidia/nemotron-3-ultra-550b-a55b",
+        "label": "Nemotron 3 Ultra 550B (NIM)",
+        "description": "NVIDIA · gratis · el más grande"
+      },
+      {
+        "model": "nim/nvidia/nemotron-3-super-120b-a12b",
+        "label": "Nemotron 3 Super 120B (NIM)",
+        "description": "NVIDIA · gratis"
+      },
+      {
+        "model": "nim/openai/gpt-oss-20b",
+        "label": "GPT-OSS 20B (NIM)",
+        "description": "OpenAI abierto vía NVIDIA · gratis"
+      },
+      {
+        "model": "nim/google/gemma-4-31b-it",
+        "label": "Gemma 4 31B (NIM)",
+        "description": "Google abierto vía NVIDIA · gratis"
+      },
+      {
+        "model": "gem/gemini-3.8-flash",
+        "label": "Gemini 3.8 Flash",
+        "description": "Google · llave Gemini · visión"
+      },
+      {
+        "model": "gem/gemini-3.5-flash-lite",
+        "label": "Gemini 3.5 Flash Lite",
+        "description": "Google · llave Gemini · rápido"
+      },
+      {
+        "model": "gem/gemini-flash-latest",
+        "label": "Gemini Flash (latest)",
+        "description": "Google · llave Gemini"
+      },
+      {
+        "model": "kilo/nvidia/nemotron-3-super-120b-a12b:free",
+        "label": "Nemotron 3 Super (Kilo)",
+        "description": "NVIDIA vía Kilo · gratis sin cuenta · 200 req/h"
+      },
+      {
+        "model": "kilo/stepfun/step-3.7-flash:free",
+        "label": "Step 3.7 Flash (Kilo)",
+        "description": "StepFun vía Kilo · gratis sin cuenta · 262k ctx"
+      },
+      {
+        "model": "kilo/cohere/north-mini-code:free",
+        "label": "North Mini Code (Kilo)",
+        "description": "Cohere · especializado en código · gratis sin cuenta"
+      },
+      {
+        "model": "or/dots-studio/dots-3-note-preview:free",
+        "label": "dots.3 note (OpenRouter)",
+        "description": "dots.studio vía OpenRouter · gratis hasta 2026-12-31 · 512k de contexto"
+      }
+    ]
+  }
+}
