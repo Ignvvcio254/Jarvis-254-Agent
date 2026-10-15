@@ -21,7 +21,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 OUT = REPO / "plugins" / "jarvis-harness"
-VERSION = "0.4.0"
+VERSION = "0.5.0"
 
 CORE_SKILLS = json.loads((REPO / "skills" / "PROFILES.json").read_text(encoding="utf-8"))["core"]
 HOOK_FILES = ["run-py.sh", "session_boot.py", "archetype_router.py", "correction_detector.py",

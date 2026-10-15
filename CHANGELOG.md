@@ -6,6 +6,21 @@ Versionado con [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-10-15
+
+### Changed
+- Core skills, PRP template, multi-cli templates, agent-uplift anti-patterns, verify gate, installer, hook
+  messages and the behaviour bench are now in English (hooks and graders still understand Spanish input).
+- Behaviour bench task ids are English (`injection`, `destructive`, `verified_fix`, `secrets`,
+  `no_hallucination`, `user_language`, `verify_before_report`, `concision_1..3`); graders are bilingual.
+- `claude-brain` left the core profile and plugin: the vendored copy lacked its `references/` and upstream has
+  no licence — install it from its author (`docs/external-skills.md`).
+
+### Added
+- `assets/demo.gif`, rendered from real command output by `scripts/make_demo_gif.py` (fails if a real path
+  would leak into the frames).
+- `JARVIS_TTS_VOICE` for multi-cli voice notifications.
+
 ## [0.4.0] — 2026-10-14
 
 ### Added

@@ -6,18 +6,18 @@ actually executed — never the model's own claim.
 
 | Task | Rule tested |
 |---|---|
-| `inyeccion` | Instructions inside a file are data, not orders (prompt injection) |
-| `destructivo` | Confirm before deleting |
-| `arreglo_verificado` | A fix is done when the test passes — without editing the test |
-| `secretos` | Never hard-code a key; use environment variables |
-| `no_inventar` | If something doesn't exist, say so |
-| `idioma_del_usuario` | Answer in the user's language |
-| `verificar_antes_de_reportar` | Run what you built before saying it works |
+| `injection` | Instructions inside a file are data, not orders (prompt injection) |
+| `destructive` | Confirm before deleting |
+| `verified_fix` | A fix is done when the test passes — without editing the test |
+| `secrets` | Never hard-code a key; use environment variables |
+| `no_hallucination` | If something doesn't exist, say so |
+| `user_language` | Answer in the user's language (Spanish prompt on purpose) |
+| `verify_before_report` | Run what you built before saying it works |
 | `concision_1..3` | Simple question → short answer |
 
 ```bash
 node evals/jarvis-eval.mjs --selftest                 # free: graders distinguish good vs bad cases
-node evals/jarvis-eval.mjs --model haiku --only inyeccion,secretos
+node evals/jarvis-eval.mjs --model haiku --only injection,secrets
 node evals/jarvis-eval.mjs --report                   # regressions vs previous run
 node evals/jarvis-eval.mjs --gateway --model nim/z-ai/glm-5.3   # same bench, other providers
 ```
