@@ -36,14 +36,8 @@ gateway that looks at the `model` field of each request:
    - **Windows:** `pwsh ~/.claude/scripts/claude-multi.ps1` — starts the proxy if needed, verifies it, and opens
      Claude Code with the extra models in `/model`. If anything fails it falls back to plain Claude.
      `CLAUDE_PLAIN=1` skips the gateway entirely.
-   - **macOS/Linux:**
-     ```bash
-     export MODELO_PROXY_TOKEN=$(openssl rand -hex 32)
-     node ~/.claude/scripts/modelo-proxy.mjs &
-     ANTHROPIC_BASE_URL=http://127.0.0.1:8787 \
-     ANTHROPIC_CUSTOM_HEADERS="x-gateway-token: $MODELO_PROXY_TOKEN" \
-       claude --settings ~/.claude/profiles/multi.settings.json
-     ```
+   - **macOS / Linux / WSL:** `bash ~/.claude/scripts/claude-multi.sh` — same guarantees (HMAC check of the
+     proxy, minimal environment, falls back to plain Claude). Tip: `alias claude-multi='bash ~/.claude/scripts/claude-multi.sh'`.
 
 ## Adding a provider or model
 
