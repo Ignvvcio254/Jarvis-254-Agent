@@ -43,3 +43,18 @@ def test_name_fills_placeholder_only_on_fresh_install(tmp_path):
     (tmp_path / "CLAUDE.md").write_text("mine", encoding="utf-8")
     run(tmp_path, "--name", "Other", "--no-hooks")
     assert (tmp_path / "CLAUDE.md").read_text(encoding="utf-8") == "mine"
+
+
+def test_skill_profiles_reference_existing_skills():
+    profiles = json.loads((REPO / "skills" / "PROFILES.json").read_text(encoding="utf-8"))
+    for name in profiles["core"] + profiles["dev"]:
+        assert (REPO / "skills" / name / "SKILL.md").exists(), name
+
+
+def test_core_profile_is_lean(tmp_path):
+    run(tmp_path, "--skills", "core", "--no-hooks")
+    installed = [p for p in (tmp_path / "skills").iterdir() if p.is_dir()]
+    assert 5 <= len(installed) <= 20
+    assert (tmp_path / "skills" / "field-lessons" / "SKILL.md").exists()
+    assert (tmp_path / "output-styles" / "jarvis-concise.md").exists()
+    assert (tmp_path / "evals" / "jarvis-eval.mjs").exists()

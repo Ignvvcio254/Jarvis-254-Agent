@@ -6,6 +6,16 @@ Versionado con [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-10-14
+
+### Added
+- `field-lessons` skill: 34 engineering laws distilled (anonymised) from real production incidents.
+- Behaviour bench `evals/` + `/eval-jarvis`: graded by disk state, tools used and executed code; `--selftest` checks graders.
+- `output-styles/jarvis-concise.md`.
+- Skill profiles (`skills/PROFILES.json`, `install.py --skills core|dev|all`); default `dev` (53 skills) instead of all 1400+ (~57k tokens/session).
+- Verification law in `CLAUDE.md`; `AGENTS.md` points to field lessons.
+- `docs/external-skills.md`: community packs installed from their authors via `npx skills`.
+
 ## [0.3.0] — 2026-10-14
 
 ### Added

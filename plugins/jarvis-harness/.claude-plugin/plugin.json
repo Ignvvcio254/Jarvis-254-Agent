@@ -1,6 +1,6 @@
 {
   "name": "jarvis-harness",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Objective verdicts (verify-repair), autopilot hooks, token routing, subagent orchestration and self-improvement for Claude Code.",
   "author": {
     "name": "Jarvis-254-Agent contributors"

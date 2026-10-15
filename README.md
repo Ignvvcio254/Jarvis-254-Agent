@@ -94,6 +94,9 @@ python jarvis_runtime.py plan --intent "build a REST API with FastAPI"
 | 💸 **Token economy** | `token-router` + `agent-uplift`: the cheapest model that can do the job, lifted with specs + verify-repair loops. | [harness](docs/harness.md) |
 | 🧩 **Any model in `/model`** | Local gateway: Claude untouched + NVIDIA NIM, Gemini, Groq, Mistral, Cerebras, xAI, OpenRouter, Ollama, and `auto/*` fallback chains. | [models](docs/models.md) |
 | 🕸 **Orchestration** | 9 subagents (planner, reviewers, TDD, silent-failure hunter, cheap worker), `subagent-orchestration`, `multi-cli`, `long-run-harness`. | [harness](docs/harness.md) |
+| 🧠 **Field lessons** | 34 engineering laws distilled from real production incidents of a 24/7 agent (silent failures, false "verified", deploys, migrations). | [skill](skills/field-lessons/SKILL.md) |
+| 📏 **Behaviour bench** | `/eval-jarvis`: real `claude -p` runs graded by disk state and executed code — injection, destructive actions, secrets, verify-before-report. | [evals](evals/README.md) |
+| 🪶 **Lean by default** | `install.py --skills core\|dev\|all`: installing all 1400+ skills costs ~57k tokens of descriptions per session; default `dev` installs 53. | [install](INSTALL.md) |
 
 ---
 
@@ -379,6 +382,8 @@ Replace placeholders in `CLAUDE.md`:
 | [`docs/harness.md`](docs/harness.md) | Verify-repair, autopilot hooks, subagents, doctrines |
 | [`docs/models.md`](docs/models.md) | Multi-model gateway: add any provider/model to `/model` |
 | [`AGENTS.md`](AGENTS.md) | Portable contract for Codex / OpenCode / Cursor / Gemini CLI |
+| [`docs/external-skills.md`](docs/external-skills.md) | Recommended community skill packs, installed from their authors |
+| [`evals/README.md`](evals/README.md) | Behaviour bench: measure the agent against its own rules |
 | [`docs/commands.md`](docs/commands.md) | All slash commands and their behavior |
 | [`docs/command-skill-matrix.md`](docs/command-skill-matrix.md) | Command → skill → workflow mapping |
 | [`docs/skills-guide.md`](docs/skills-guide.md) | How to navigate 1400+ skills |

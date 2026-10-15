@@ -36,12 +36,13 @@ HOOKS = {
 
 # (origen en el repo, destino relativo a ~/.claude, sobrescribir)
 COPIES = [
-    ("skills", "skills", True),
     ("agents", "agents", True),
     ("commands", "commands", True),
     ("rules", "rules", True),
     ("hooks", "scripts", True),
     ("models", "scripts", True),
+    ("evals", "evals", True),
+    ("output-styles", "output-styles", True),
     ("models/profiles/gateway.example.json", "profiles/gateway.json", False),
     ("models/profiles/multi.settings.example.json", "profiles/multi.settings.json", False),
 ]
@@ -62,6 +63,22 @@ def copy_item(src: Path, dst: Path, overwrite: bool, dry: bool) -> int:
             if f.parent.name == "profiles" and src.name == "models":
                 continue  # los perfiles se instalan aparte, sin pisar
             n += copy_item(f, dst / f.relative_to(src), overwrite, dry)
+    return n
+
+
+def install_skills(home: Path, profile: str, dry: bool) -> int:
+    """core = harness only · dev = core + curated engineering pack (default) · all = every skill."""
+    src = REPO / "skills"
+    if profile == "all":
+        names = sorted(p.name for p in src.iterdir() if (p / "SKILL.md").exists())
+    else:
+        profiles = json.loads((src / "PROFILES.json").read_text(encoding="utf-8"))
+        names = profiles["core"] + (profiles["dev"] if profile == "dev" else [])
+    n = 0
+    for name in names:
+        if (src / name).is_dir():
+            n += copy_item(src / name, home / "skills" / name, True, dry)
+    print(f"  + skills ({profile}): {len(names)} skill(s), {n} archivo(s)")
     return n
 
 
@@ -91,11 +108,14 @@ def main() -> int:
     ap.add_argument("--claude-dir", default=str(Path.home() / ".claude"))
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--no-hooks", action="store_true")
+    ap.add_argument("--skills", choices=["core", "dev", "all"], default="dev",
+                    help="core: harness only · dev: + curated engineering pack (default) · all: 1400+ (~57k tokens/session)")
     ap.add_argument("--name", default="", help="how Jarvis addresses you; fills {{YOUR_NAME}} in CLAUDE.md")
     a = ap.parse_args()
     home = Path(a.claude_dir).expanduser()
 
     print(f"Jarvis 254 Agent -> {home}{' (dry-run)' if a.dry_run else ''}")
+    install_skills(home, a.skills, a.dry_run)
     for src, dst, overwrite in COPIES:
         n = copy_item(REPO / src, home / dst, overwrite, a.dry_run)
         print(f"  + {src} -> {dst}: {n} archivo(s)")

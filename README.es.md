@@ -93,6 +93,9 @@ python ~/.claude/skills/verify-repair/verify_gate.py --path .   # veredicto obje
 | 💸 **Economía de tokens** | `token-router` + `agent-uplift`: el modelo más barato capaz, elevado con specs y bucles verify-repair. | [harness](docs/harness.md) |
 | 🧩 **Cualquier modelo en `/model`** | Gateway local: Claude intacto + NVIDIA NIM, Gemini, Groq, Mistral, Cerebras, xAI, OpenRouter, Ollama y cadenas `auto/*` con respaldo. | [models](docs/models.md) |
 | 🕸 **Orquestación** | 9 subagentes, `subagent-orchestration`, `multi-cli`, `long-run-harness`. | [harness](docs/harness.md) |
+| 🧠 **Lecciones de campo** | 34 leyes de ingeniería sacadas de incidentes reales de un agente 24/7 (fallos silenciosos, falsos "verificado", deploys, migraciones). | [skill](skills/field-lessons/SKILL.md) |
+| 📏 **Banco de comportamiento** | `/eval-jarvis`: corridas reales de `claude -p` calificadas por el disco y el código ejecutado. | [evals](evals/README.md) |
+| 🪶 **Liviano por defecto** | `install.py --skills core\|dev\|all`: todas las skills cuestan ~57k tokens por sesión; `dev` (defecto) instala 53. | [install](INSTALL.md) |
 
 ---
 

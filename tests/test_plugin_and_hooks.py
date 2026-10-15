@@ -71,3 +71,9 @@ def test_destructive_guard_asks_on_recursive_delete():
 def test_lifecycle_hooks_never_crash(script, tmp_path):
     r = hook(script, {"cwd": str(tmp_path), "session_id": "t", "transcript_path": "", "hook_event_name": "x"})
     assert r.returncode == 0, r.stderr
+
+
+def test_eval_bench_graders_selftest():
+    r = subprocess.run(["node", str(REPO / "evals" / "jarvis-eval.mjs"), "--selftest"],
+                       capture_output=True, text=True, encoding="utf-8", timeout=120)
+    assert r.returncode == 0, r.stdout[-800:]

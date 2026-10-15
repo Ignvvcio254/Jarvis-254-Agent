@@ -21,14 +21,13 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 OUT = REPO / "plugins" / "jarvis-harness"
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 
-CORE_SKILLS = ["verify-repair", "token-router", "scratchpad", "agent-uplift", "multi-cli",
-               "subagent-orchestration", "long-run-harness", "jarvis-evolve", "prp", "bucle-agentico"]
+CORE_SKILLS = json.loads((REPO / "skills" / "PROFILES.json").read_text(encoding="utf-8"))["core"]
 HOOK_FILES = ["run-py.sh", "session_boot.py", "archetype_router.py", "correction_detector.py",
               "destructive_guard.py", "precompact_checkpoint.py", "verdict_guard.py", "verdict_stamp.py",
               "token_ledger.py", "harness_guard.mjs"]
-COMMANDS = ["memoria.md", "consumo.md", "doctor.md"]
+COMMANDS = ["memoria.md", "consumo.md", "doctor.md", "eval-jarvis.md"]
 
 # event -> [(matcher, script, timeout)]  (same wiring as install.py)
 HOOKS = {

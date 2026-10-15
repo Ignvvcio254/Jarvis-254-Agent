@@ -12,6 +12,8 @@ Claude Code via `CLAUDE.md`). It is the portable core of Jarvis; the full contra
 4. **Confirm before irreversible actions:** deleting, force-pushing, deploying, paying, sending messages.
 5. **Never commit secrets.** Keys come from environment variables (`env:NAME` in configs).
 6. **Branch + PR.** Never push to the default branch directly.
+7. **Read `skills/field-lessons/SKILL.md`** before claiming done/deployed, debugging a "works but doesn't"
+   symptom, merging, migrating, or writing guards, installers and fallbacks.
 
 ## Working method
 - Classify the task (BUILD · FIX · DESIGN · RESEARCH · TEST · DEPLOY · AUTOMATE · DATA) and load the

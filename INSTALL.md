@@ -50,13 +50,17 @@ python install.py --dry-run          # preview
 python install.py                    # install
 python install.py --no-hooks         # files only, settings.json untouched
 python install.py --claude-dir PATH  # another Claude config dir
+python install.py --skills core      # harness only (12 skills)
+python install.py --skills all       # all 1400+ skills (~57k tokens of descriptions per session)
+python install.py --name "Ada"       # fills {{YOUR_NAME}} in a fresh CLAUDE.md
 ```
 
 What `install.py` does:
 
 | Source | Destination | Overwrites? |
 |---|---|---|
-| `skills/`, `agents/`, `commands/`, `rules/` | `~/.claude/...` | yes (repo files only; your other files stay) |
+| `skills/` per profile (`dev` default: 53) | `~/.claude/skills/` | yes (repo skills only; yours stay) |
+| `agents/`, `commands/`, `rules/`, `evals/`, `output-styles/` | `~/.claude/...` | yes (repo files only; your other files stay) |
 | `hooks/*`, `models/*` | `~/.claude/scripts/` | yes |
 | `models/profiles/*.example.json` | `~/.claude/profiles/gateway.json`, `multi.settings.json` | **no** — only if absent |
 | `CLAUDE.md` | `~/.claude/CLAUDE.md` | **no** — only if absent |
@@ -76,6 +80,9 @@ What `install.py` does:
    want into the `mcpServers` of `~/.claude.json` (or use `claude mcp add`); never copy the template over it.
    Keys go in environment variables (`mcp/env.example`).
 4. **More models (optional)** — see [`docs/models.md`](docs/models.md).
+5. **Output style (optional)** — `/output-style jarvis-concise` for short, decision-focused answers.
+6. **Community skill packs (optional)** — see [`docs/external-skills.md`](docs/external-skills.md).
+7. **Measure** — `/eval-jarvis selftest`, then a small real run.
 
 ## Verify
 
