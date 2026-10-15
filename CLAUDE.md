@@ -242,11 +242,23 @@ Use this workflow when the task:
 
 **Skill teaches · Hook enforces · Subagent isolates.** The verdict is objective (exit code / test / grep / screenshot), never a claim.
 
+### Verification law (non-negotiable — details and incidents in the `field-lessons` skill)
+1. Verify the **effect**, not the configuration (a hook in a JSON proves nothing; its log line does).
+2. Verifying the mechanism is not verifying the cause: also test where the triggering flag comes from.
+3. Never detect state with substrings over raw JSON — parse and read the field.
+4. A label you wrote is not a signal; name the real system signal that confirms it.
+5. A signed field is immutable; annotations travel outside it.
+6. No mute rejection: every refusal says what happened and that nothing was executed.
+7. Optimistic fallback = structural lie. Without a real result, say so.
+8. Installers merge config, never `if [ ! -f ] && cp`.
+9. "Merged" ≠ "in production": check the served artifact.
+10. Measure with the bench (`/eval-jarvis`) after changing hooks, rules or this file.
+
 ---
 
 ## 🗜️ CAVEMAN — Progressive compression modes
 
-Skill installed in `~/.claude/skills/caveman/`. Activate only with {{YOUR_NAME}}'s approval.
+Uses the community skill [caveman](https://github.com/JuliusBrussee/caveman) (install: `git clone https://github.com/JuliusBrussee/caveman ~/.claude/skills/caveman`). Activate only with {{YOUR_NAME}}'s approval.
 
 | Mode | Trigger | Reduction | Behavior |
 |------|---------|-----------|----------|

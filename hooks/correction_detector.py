@@ -1,29 +1,22 @@
 #!/usr/bin/env python3
 """
-JARVIS CORRECTION DETECTOR — automatiza la correction-detection del skill
-scratchpad (F3). Porta el patrón de prax-agent.
+JARVIS CORRECTION DETECTOR — automates the correction-detection step of the
+scratchpad skill (UserPromptSubmit hook).
 
-Como UserPromptSubmit hook, examina cada mensaje del usuario. Si detecta
-una corrección (frases tipo "no, mejor", "está mal", "ya te dije", "otra vez"),
-inyecta un recordatorio para que Jarvis extraiga el patrón problema→solución y
-lo guarde en su capa-hogar (memory/ feedback, antipatterns, o cerebro) — en vez
-de dejar la corrección morir en la conversación.
+If the user's message looks like a correction ("no, actually", "I already told
+you", "ya te dije", "está mal"...), it injects a reminder to extract the
+problem→solution pattern and save it to memory instead of letting it die in the
+conversation. Knowledge that only lives in a conversation is dead knowledge.
 
-"Conocimiento solo-en-conversación = conocimiento muerto" (doctrina Mythos).
-
-Uso (settings.json UserPromptSubmit):
+Usage (settings.json UserPromptSubmit):
   { "type": "command", "command": "python ~/.claude/scripts/correction_detector.py" }
-
-Lee {prompt} por stdin. Salida:
-  - sin corrección → exit 0 silencioso
-  - con corrección → additionalContext recordando guardar el patrón
 """
 import json
 import re
 import sys
 
-# Señales de corrección en español (el usuario corrige o reitera).
 PATTERNS = [
+    # Spanish
     r"\bno,?\s+(mejor|en realidad|así no|eso no)\b",
     r"\b(está|esta)\s+mal\b",
     r"\bno\s+es\s+(así|asi|correcto|lo que)\b",
@@ -36,6 +29,15 @@ PATTERNS = [
     r"\bte\s+(dije|ped[ií])\s+que\b",
     r"\beso\s+(no era|no es lo que)\b",
     r"\bmal\s+ah[ií]\b",
+    # English
+    r"\bno,?\s+(actually|instead|that's not|not like that)\b",
+    r"\b(that's|that is|this is)\s+(wrong|not what i)\b",
+    r"\bi\s+(already\s+)?(told|asked)\s+you\b",
+    r"\byou\s+(got it wrong|were wrong|made a mistake)\b",
+    r"\b(again|once more)\s+the\s+same\b",
+    r"\b(remember|don't forget)\s+that\b",
+    r"\b(don't|do not|stop)\s+(do|doing|use|using|add|adding)\b",
+    r"\b(always|never)\s+(do|use|add|put|write)\b",
 ]
 
 
@@ -53,18 +55,17 @@ def main():
     if not prompt:
         sys.exit(0)
 
-    hit = next((p for p in PATTERNS if re.search(p, prompt)), None)
-    if not hit:
+    if not any(re.search(p, prompt) for p in PATTERNS):
         sys.exit(0)
 
     msg = (
-        "[correction-detector] Detecté una posible CORRECCIÓN del usuario. "
-        "Antes de continuar, aplica el skill scratchpad (F3): "
-        "1) extrae el patrón problema→solución (qué hice mal, qué debí hacer); "
-        "2) guárdalo en su capa-hogar (memory/ tipo feedback si es sobre cómo trabajar, "
-        "antipatterns/<modelo> si es de un worker, cerebro si es decisión de sesión); "
-        "3) confirma en una línea: 'Anotado: <regla> — no se repetirá'. "
-        "No dejes la corrección solo en la conversación."
+        "[correction-detector] Possible CORRECTION from the user. "
+        "Before continuing, apply the scratchpad skill: "
+        "1) extract the problem->solution pattern (what went wrong, what should have been done); "
+        "2) save it where it belongs (memory as feedback if it is about how to work, "
+        "agent-uplift antipatterns/<model> if it is about a worker, cerebro if it is a session decision); "
+        "3) confirm in one line, in the user's language: 'Noted: <rule>'. "
+        "Never leave a correction only in the conversation."
     )
     print(json.dumps({
         "hookSpecificOutput": {"hookEventName": "UserPromptSubmit", "additionalContext": msg}

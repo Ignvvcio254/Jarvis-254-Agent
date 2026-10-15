@@ -1,44 +1,52 @@
 #!/usr/bin/env python3
 """
-JARVIS ARCHETYPE ROUTER — autopilot del MOTOR DE DECISIÓN (UserPromptSubmit hook).
+JARVIS ARCHETYPE ROUTER — autopilot for the DECISION ENGINE (UserPromptSubmit hook).
 
-Automatiza la clasificación de la tarea entrante en uno de los arquetipos del
-CLAUDE.md e inyecta qué skills del núcleo activar — para que Jarvis no dependa de
-recordar el motor de decisión, el sistema se lo recuerda en cada mensaje relevante.
+Classifies the incoming task into one of the CLAUDE.md archetypes (BUILD, FIX, ...)
+and injects which core skills to activate, so the agent does not depend on
+remembering the decision engine. Bilingual detection (English / Spanish).
 
-Solo dispara cuando detecta una tarea de ingeniería (no en charla trivial), para
-no ensuciar conversaciones casuales.
+Only fires on engineering tasks, never on small talk.
 
-Uso (settings.json UserPromptSubmit):
+Usage (settings.json UserPromptSubmit):
   { "type": "command", "command": "python ~/.claude/scripts/archetype_router.py" }
 """
 import json
 import re
 import sys
 
-# arquetipo -> (patrones, skills/herramientas núcleo sugeridas)
+# archetype -> (pattern, suggested core skills)
 ARCHETYPES = [
-    ("BUILD", r"\b(crea|construye|implementa|agrega|nueva feature|nuevo (componente|endpoint|módulo)|desarrolla)\b",
-     "token-router (modelo por dificultad) → spec-compiler (agent-uplift) → verify-repair (gate). Subagentes si es multi-archivo."),
-    ("FIX", r"\b(arregla|fix|corrige|bug|error|falla|no funciona|rompe|crashea)\b",
-     "verify-repair PRIMERO (reproducir el fallo objetivamente) → fix → re-verificar. Crítico ≠ generador si no converge."),
-    ("DESIGN", r"\b(diseña|mockup|ui|interfaz|landing|pantalla|estética|componente visual)\b",
-     "stitch-design / emil-design-eng + web-accessibility. verify con playwright screenshot."),
-    ("RESEARCH", r"\b(investiga|compara|analiza opciones|documentación|qué librería|busca cómo)\b",
-     "subagent-orchestration (fan-out Explore en paralelo → synthesize). exa/context7/firecrawl."),
-    ("TEST", r"\b(test|prueba|e2e|cobertura|tdd|valida)\b",
-     "verify-repair + playwright/pytest. Veredicto objetivo, no claim."),
-    ("DEPLOY", r"\b(deploy|despliega|producción|vercel|docker|build de prod)\b",
-     "verify-repair (smoke test) + multi-cli si es a escala. Confirmar antes de acción irreversible."),
-    ("DATA", r"\b(query|migración|esquema|base de datos|sql|prisma|tabla)\b",
-     "buscar-skill(ORM) + verify-repair. Confirmar antes de migración destructiva."),
-    ("SWARM", r"\b(en paralelo|múltiples archivos|todo el codebase|a escala|varios agentes)\b",
-     "subagent-orchestration (fan-out/synthesize + grader) o multi-cli (AGY/OpenCode). 3-5 concurrentes óptimo."),
+    ("BUILD",
+     r"\b(create|build|implement|add|new feature|scaffold|develop|crea|construye|implementa|agrega|nueva feature|nuevo (componente|endpoint|módulo)|desarrolla)\b",
+     "token-router (model by difficulty) → spec compiler (agent-uplift) → verify-repair (gate). Subagents if multi-file."),
+    ("FIX",
+     r"\b(fix|debug|bug|error|broken|crash|crashes|not working|failing|arregla|corrige|falla|no funciona|rompe|crashea)\b",
+     "verify-repair FIRST (reproduce the failure objectively) → fix → re-verify. Critic ≠ generator if it doesn't converge."),
+    ("DESIGN",
+     r"\b(design|mockup|ui|ux|layout|landing|screen|styling|diseña|interfaz|pantalla|estética|componente visual)\b",
+     "frontend design skills + web-accessibility. Verify with a playwright screenshot."),
+    ("RESEARCH",
+     r"\b(research|investigate|compare|which library|how to|investiga|compara|analiza opciones|documentación|qué librería|busca cómo)\b",
+     "subagent-orchestration (parallel Explore fan-out → synthesize) + official docs (context7)."),
+    ("TEST",
+     r"\b(test|tests|testing|e2e|coverage|tdd|validate|prueba|cobertura|valida)\b",
+     "verify-repair + playwright/pytest. Objective verdict, not a claim."),
+    ("DEPLOY",
+     r"\b(deploy|deployment|ship|release|production|docker|despliega|producción|build de prod)\b",
+     "verify-repair (smoke test). Confirm before any irreversible action."),
+    ("DATA",
+     r"\b(query|migration|schema|database|sql|prisma|table|migración|esquema|base de datos|tabla)\b",
+     "the ORM/database skill + verify-repair. Confirm before a destructive migration."),
+    ("SWARM",
+     r"\b(in parallel|many files|whole codebase|at scale|multiple agents|en paralelo|múltiples archivos|todo el codebase|a escala|varios agentes)\b",
+     "subagent-orchestration (fan-out/synthesize + grader) or multi-cli. 3-5 concurrent is optimal."),
 ]
 
-# No disparar en charla trivial
-TRIVIAL = re.compile(r"^(hola|hey|buenas|gracias|ok|dale|sí|no|jaja|qué tal|cómo (estás|vas))",
-                     re.IGNORECASE)
+# Do not fire on small talk
+TRIVIAL = re.compile(
+    r"^(hola|hey|hi|hello|thanks|thank you|buenas|gracias|ok|dale|sí|yes|no|jaja|lol|qué tal|cómo (estás|vas))(\W|$)",
+    re.IGNORECASE)
 
 
 def extract_text(prompt: str) -> str:
@@ -60,13 +68,12 @@ def main():
     if not matched:
         sys.exit(0)
 
-    # máx 2 arquetipos (regla de tareas mixtas del CLAUDE.md)
-    matched = matched[:2]
+    matched = matched[:2]  # max 2 archetypes (mixed-task rule in CLAUDE.md)
     lines = [f"- **{name}** → {skills}" for name, skills in matched]
     msg = (
-        "[archetype-router] Tarea de ingeniería detectada. Motor de decisión sugiere:\n"
+        "[archetype-router] Engineering task detected. Decision engine suggests:\n"
         + "\n".join(lines)
-        + "\nRecuerda: veredicto objetivo antes de reportar (verdict_guard lo impone al cerrar)."
+        + "\nReminder: objective verdict (verify-gate) before reporting done; verdict_guard enforces it on Stop."
     )
     print(json.dumps({
         "hookSpecificOutput": {"hookEventName": "UserPromptSubmit", "additionalContext": msg}

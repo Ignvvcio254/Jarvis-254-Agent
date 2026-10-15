@@ -48,22 +48,54 @@ Toma los mejores patrones del ecosistema open source — NousResearch/hermes-age
 
 ## ⚡ Inicio Rápido
 
+Elija una — las tres son idempotentes y **nunca pisan su configuración**.
+
+**A. Plugin de Claude Code** (solo el harness: skills núcleo, 9 subagentes, hooks automáticos)
+```
+/plugin install jarvis-harness --marketplace Ignvvcio254/Jarvis-254-Agent
+```
+(Claude Code anterior: `/plugin marketplace add Ignvvcio254/Jarvis-254-Agent` y luego `/plugin install jarvis-harness@jarvis-254`.)
+
+**B. Una línea — todo** (1400+ skills, reglas, wiki de memoria, hooks, gateway multi-modelo)
 ```bash
-# 1. Clonar
-git clone https://github.com/Ignvvcio254/Jarvis-254-Agent.git
-cd Jarvis-254-Agent
-
-# 2. Diagnosticar tu setup al instante
-python jarvis_doctor.py --repo-only
-
-# 3. Planear tu primera tarea
-python jarvis_runtime.py plan --intent "construir una API REST con FastAPI"
-
-# 4. Buscar en tu wiki de memoria (FTS5 BM25 — cero dependencias)
-python jarvis_runtime.py memory search "patrones de autenticación"
+# macOS / Linux / WSL
+curl -fsSL https://raw.githubusercontent.com/Ignvvcio254/Jarvis-254-Agent/main/scripts/bootstrap.sh | sh
+```
+```powershell
+# Windows (PowerShell 7)
+irm https://raw.githubusercontent.com/Ignvvcio254/Jarvis-254-Agent/main/scripts/bootstrap.ps1 | iex
 ```
 
-> ✅ Sin npm. Sin Docker. Sin cuenta cloud requerida.
+**C. Manual**
+```bash
+git clone https://github.com/Ignvvcio254/Jarvis-254-Agent.git && cd Jarvis-254-Agent
+python install.py --dry-run   # vista previa
+python install.py             # instala (respalda settings.json y fusiona hooks)
+python jarvis_doctor.py       # chequeo de salud
+```
+
+Luego, en cualquier proyecto:
+```bash
+python ~/.claude/skills/verify-repair/verify_gate.py --path .   # veredicto objetivo
+```
+
+> ✅ Python 3.8+ y Git. Node 18+ solo para el gateway multi-modelo opcional. Sin Docker ni cuenta cloud.
+> También sirve con Codex / OpenCode / Cursor: leen [`AGENTS.md`](AGENTS.md).
+
+---
+
+## 🆕 v0.3 — Harness, hooks automáticos y cualquier modelo
+
+| | Qué obtiene | Docs |
+|---|---|---|
+| ✅ **Veredicto objetivo** | `verify-repair` + `verify_gate.py`: una tarea está hecha cuando los checks pasan, no cuando el modelo lo dice. Un hook `Stop` impide declarar "listo" sobre código sin verificar. | [harness](docs/harness.md) |
+| 🤖 **Hooks automáticos** | Retoma la sesión, enruta por arquetipo de tarea, captura correcciones, frena acciones destructivas, guarda checkpoint antes de compactar. | [harness](docs/harness.md) |
+| 💸 **Economía de tokens** | `token-router` + `agent-uplift`: el modelo más barato capaz, elevado con specs y bucles verify-repair. | [harness](docs/harness.md) |
+| 🧩 **Cualquier modelo en `/model`** | Gateway local: Claude intacto + NVIDIA NIM, Gemini, Groq, Mistral, Cerebras, xAI, OpenRouter, Ollama y cadenas `auto/*` con respaldo. | [models](docs/models.md) |
+| 🕸 **Orquestación** | 9 subagentes, `subagent-orchestration`, `multi-cli`, `long-run-harness`. | [harness](docs/harness.md) |
+| 🧠 **Lecciones de campo** | 34 leyes de ingeniería sacadas de incidentes reales de un agente 24/7 (fallos silenciosos, falsos "verificado", deploys, migraciones). | [skill](skills/field-lessons/SKILL.md) |
+| 📏 **Banco de comportamiento** | `/eval-jarvis`: corridas reales de `claude -p` calificadas por el disco y el código ejecutado. | [evals](evals/README.md) |
+| 🪶 **Liviano por defecto** | `install.py --skills core\|dev\|all`: todas las skills cuestan ~57k tokens por sesión; `dev` (defecto) instala 53. | [install](INSTALL.md) |
 
 ---
 
@@ -319,23 +351,9 @@ python jarvis_runtime.py <comando>
 
 ## 🚀 Instalación
 
-Ver [`INSTALL.md`](INSTALL.md) para la guía completa.
-
-<details>
-<summary><strong>📦 Instalación rápida (3 comandos)</strong></summary>
-
-```bash
-# Copiar slash commands
-cp -r commands/* ~/.claude/commands/
-
-# Copiar skills
-cp -r skills/* ~/.claude/skills/
-
-# Verificar que todo está correcto
-python jarvis_doctor.py
-```
-
-</details>
+Ver [Inicio Rápido](#-inicio-rápido) y [`INSTALL.md`](INSTALL.md). `install.py` copia skills/agentes/comandos/reglas/hooks,
+instala los perfiles del gateway solo si no existen, respalda `~/.claude/settings.json` y **fusiona** los hooks
+(se puede correr de nuevo sin riesgo).
 
 <details>
 <summary><strong>🔧 Configurar tu CLAUDE.md</strong></summary>

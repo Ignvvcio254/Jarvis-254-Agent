@@ -3,14 +3,15 @@
 > **Skill teaches · Hook enforces · Subagent isolates.**
 > A task is done when the system confirms it (exit code, test, grep, screenshot) — never because the model says so.
 
-`python install.py` installs everything below and merges the hooks into `~/.claude/settings.json`
+Install as a plugin (`/plugin install jarvis-harness --marketplace Ignvvcio254/Jarvis-254-Agent`) or run
+`python install.py`, which installs everything below and merges the hooks into `~/.claude/settings.json`
 (backup first, no duplicates, your own hooks untouched).
 
 ## 1. Core skills (`skills/`)
 
 | Skill | Use it when |
 |---|---|
-| `verify-repair` | Before reporting ANY code/fix/build. `verify-gate.ps1` auto-detects the project, runs parse/typecheck/lint/test/behaviour checks and writes `.verify/verdict.json` bound to a hash of the tree. Repair loop with a critic separate from the generator. |
+| `verify-repair` | Before reporting ANY code/fix/build. `verify_gate.py` (any OS; `verify-gate.ps1` on PowerShell) auto-detects the project, runs parse/typecheck/lint/test/behaviour checks and writes `.verify/verdict.json` bound to a hash of the tree. Repair loop with a critic separate from the generator. |
 | `token-router` | Before executing or delegating: pick the *minimum* sufficient model per difficulty (trivial → Haiku/free, standard → Sonnet, hard → Opus). |
 | `scratchpad` | Multi-phase tasks (`.scratch/task.md`), capturing user corrections, and propagating learnings to memory at session close. |
 | `subagent-orchestration` | Massively parallel / long / adversarial work: fan-out → synthesize, rubric graders, `SubagentStop` gates. The main context only sees summaries. |

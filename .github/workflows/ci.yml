@@ -13,8 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
-        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.12", "3.13"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -39,3 +39,57 @@ jobs:
 
       - name: Doctor check (repo-only)
         run: python jarvis_doctor.py --repo-only
+
+      - name: Plugin in sync with sources
+        run: python scripts/build_plugin.py --check
+
+  e2e-install:
+    name: Clean install E2E / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Bootstrap into an empty HOME from this checkout
+        shell: bash
+        run: |
+          export FAKE_HOME="$RUNNER_TEMP/home" && mkdir -p "$FAKE_HOME"
+          JARVIS_REPO="file://$GITHUB_WORKSPACE" JARVIS_HOME="$FAKE_HOME/.jarvis-254" HOME="$FAKE_HOME"             sh scripts/bootstrap.sh --claude-dir "$FAKE_HOME/.claude" --name "CI"
+          test -f "$FAKE_HOME/.claude/skills/verify-repair/verify_gate.py"
+          test -f "$FAKE_HOME/.claude/scripts/modelo-proxy.mjs"
+          python -c "import json,sys; s=json.load(open(sys.argv[1])); assert len(s['hooks'])==5, s" "$FAKE_HOME/.claude/settings.json"
+          ! grep -q "{{YOUR_NAME}}" "$FAKE_HOME/.claude/CLAUDE.md"
+      - name: Installed hooks run from settings.json
+        shell: bash
+        run: |
+          S="$RUNNER_TEMP/home/.claude/settings.json"
+          python - "$S" <<'PY'
+          import json, subprocess, sys
+          s = json.load(open(sys.argv[1]))
+          for event, groups in s["hooks"].items():
+              for g in groups:
+                  for h in g["hooks"]:
+                      r = subprocess.run(h["command"], shell=True, input='{"prompt":"fix the bug","cwd":"."}',
+                                         capture_output=True, text=True, timeout=30)
+                      print(event, r.returncode, h["command"][-40:])
+                      assert r.returncode == 0, r.stderr
+          PY
+      - name: Verify gate on a sample project
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/proj" && echo "x = 1" > "$RUNNER_TEMP/proj/app.py"
+          python "$RUNNER_TEMP/home/.claude/skills/verify-repair/verify_gate.py" --path "$RUNNER_TEMP/proj"
+      - name: Gateway answers its health check
+        shell: bash
+        run: |
+          export MODELO_PROXY_TOKEN=ci-token MODELO_PROXY_PORT=8799 MODELO_PROXY_CONFIG=models/profiles/gateway.example.json
+          node models/modelo-proxy.mjs & sleep 2
+          curl -fsS "http://127.0.0.1:8799/__proxy_health?n=abc" | grep -q '"ok":true'
